@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { GraduationCap, User, Users, MapPin, FileText, CreditCard } from "lucide-react";
+import { API_BASE_URL } from "@/lib/api";
 
 type Session = {
   _id: string;
@@ -108,7 +109,7 @@ export default function ApplyAdmission() {
     const fetchSession = async () => {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/sessions/active`
+          `${API_BASE_URL}/sessions/active`
         );
         const data = await res.json();
         setSession(data);
@@ -168,7 +169,7 @@ export default function ApplyAdmission() {
       });
 
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admissions`,
+        `${API_BASE_URL}/admissions`,
         {
           method: "POST",
           body: formDataToSend,

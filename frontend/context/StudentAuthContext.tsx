@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { API_BASE_URL } from "@/lib/api";
 
 interface Student {
   _id: string;
@@ -9,6 +10,10 @@ interface Student {
   name: string;
   personal: any;
   academic: any;
+  parents?: any;
+  address?: any;
+  documents?: any;
+  bankDetails?: any;
 }
 
 interface StudentAuthContextType {
@@ -29,7 +34,7 @@ export function StudentAuthProvider({ children }: { children: ReactNode }) {
     if (token) {
       const fetchStudent = async () => {
         try {
-          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student-auth/profile`, {
+          const res = await fetch(`${API_BASE_URL}/student-auth/profile`, {
             headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {
@@ -49,13 +54,18 @@ export function StudentAuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (identifier: string, password: string) => {
-    return fetch(`${process.env.NEXT_PUBLIC_API_URL}/student-auth/login`, {
+    return fetch(`${API_BASE_URL}/student-auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ identifier, password }),
     }).then(async res => {
-      if (!res.ok) throw new Error("Invalid credentials");
-      return res.json();
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Unable to reach backend service");
+      }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Invalid credentials");
+      return data;
     }).then(data => {
       localStorage.setItem("studentToken", data.token);
       setStudent(data.student);

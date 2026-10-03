@@ -29,13 +29,20 @@ const generateAdmissionNo = async () => {
   return `ADM-${year}-${String(count + 1).padStart(4, '0')}`;
 };
 
-const uploadToCloudinary = async (fileBuffer) => {
+const uploadToCloudinary = async (fileBuffer, mimetype = 'image/jpeg') => {
+  if (!process.env.CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_CLOUD_NAME === 'your_cloud_name') {
+    return `data:${mimetype};base64,${fileBuffer.toString('base64')}`;
+  }
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       { folder: 'school-erp' },
       (error, result) => {
-        if (error) reject(error);
-        else resolve(result.secure_url);
+        if (error) {
+          console.warn('Cloudinary upload warning, using inline fallback:', error.message);
+          resolve(`data:${mimetype};base64,${fileBuffer.toString('base64')}`);
+        } else {
+          resolve(result.secure_url);
+        }
       }
     );
     stream.end(fileBuffer);
@@ -110,8 +117,24 @@ const createApplication = async (req, res) => {
 
 const getApplications = async (req, res) => {
   try {
-    const { status } = req.query;
-    const query = status ? { status } : {};
+    const { status, class: classFilter, search } = req.query;
+    const query = {};
+    if (status && status !== 'all') {
+      query.status = status;
+    }
+    if (classFilter && classFilter !== 'all') {
+      query['academic.class'] = classFilter;
+    }
+    if (search && search.trim() !== '') {
+      const term = search.trim();
+      query.$or = [
+        { applicationId: { $regex: term, $options: 'i' } },
+        { 'student.name': { $regex: term, $options: 'i' } },
+        { 'student.mobile': { $regex: term, $options: 'i' } },
+        { 'parents.fatherName': { $regex: term, $options: 'i' } },
+        { 'student.aadhaar': { $regex: term, $options: 'i' } }
+      ];
+    }
     const applications = await AdmissionApplication.find(query).sort({ createdAt: -1 });
     res.json(applications);
   } catch (error) {
@@ -153,9 +176,17 @@ const updateApplication = async (req, res) => {
 
 const approveApplication = async (req, res) => {
   try {
+    if (req.user.role !== 'super_admin') {
+      return res.status(403).json({ message: 'Only Super Admin (Principal) has authorization to approve admission applications' });
+    }
+
     const application = await AdmissionApplication.findById(req.params.id);
     if (!application) {
       return res.status(404).json({ message: 'Application not found' });
+    }
+
+    if (application.status === 'approved') {
+      return res.status(400).json({ message: 'Application has already been approved' });
     }
 
     const studentId = await generateStudentId();
@@ -170,7 +201,7 @@ const approveApplication = async (req, res) => {
     
     // Format DOB as DD-MM-YYYY for default password
     let defaultPassword = 'password123';
-    if (application.student.dob) {
+    if (application.student?.dob) {
       const dob = new Date(application.student.dob);
       const day = String(dob.getDate()).padStart(2, '0');
       const month = String(dob.getMonth() + 1).padStart(2, '0');
@@ -221,22 +252,26 @@ const approveApplication = async (req, res) => {
 
 const rejectApplication = async (req, res) => {
   try {
-    const application = await AdmissionApplication.findByIdAndUpdate(
-      req.params.id,
-      {
-        status: 'rejected',
-        rejectionReason: req.body.reason,
-        verifiedBy: req.user._id,
-        verifiedAt: new Date()
-      },
-      { new: true }
-    );
-
+    const application = await AdmissionApplication.findById(req.params.id);
     if (!application) {
       return res.status(404).json({ message: 'Application not found' });
     }
 
-    await logAction(req.user._id, 'reject', 'AdmissionApplication', application._id);
+    if (application.status === 'approved') {
+      return res.status(400).json({ message: 'Cannot reject an application that has already been approved' });
+    }
+
+    application.status = 'rejected';
+    application.rejectionReason = req.body.reason || 'Application rejected by administration';
+    application.verifiedBy = req.user._id;
+    application.verifiedAt = new Date();
+    await application.save();
+
+    await logAction(req.user._id, 'reject', 'AdmissionApplication', application._id, null, {
+      reason: application.rejectionReason,
+      rejectedBy: req.user.name
+    });
+
     res.json(application);
   } catch (error) {
     res.status(500).json({ message: 'Server error' });

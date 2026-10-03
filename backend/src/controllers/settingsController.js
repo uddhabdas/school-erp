@@ -18,29 +18,32 @@ const getSettings = async (req, res) => {
 
 const updateSettings = async (req, res) => {
   try {
-    const { currentCode, securityCode, ...otherSettings } = req.body;
+    const { currentCode, securityCode, schoolName, address } = req.body;
     
     let settings = await SchoolSetting.findOne();
+    if (!settings) {
+      settings = new SchoolSetting({ securityCode: 'admin123' });
+    }
     
     if (securityCode) {
-      if (!settings || !(await settings.verifySecurityCode(currentCode))) {
+      if (!(await settings.verifySecurityCode(currentCode))) {
         return res.status(403).json({ message: 'Invalid current security code' });
       }
-      otherSettings.securityCode = securityCode;
+      settings.securityCode = securityCode;
     }
 
-    const oldData = settings ? { ...settings.toObject() } : null;
-    settings = await SchoolSetting.findOneAndUpdate(
-      {},
-      otherSettings,
-      { new: true, upsert: true }
-    );
+    if (schoolName) settings.schoolName = schoolName;
+    if (address) settings.address = address;
+
+    const oldData = settings.toObject();
+    await settings.save();
 
     await logAction(req.user._id, 'update', 'SchoolSetting', settings._id, oldData, settings);
     
     const { securityCode: _, ...rest } = settings.toObject();
     res.json(rest);
   } catch (error) {
+    console.error('Error in updateSettings:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

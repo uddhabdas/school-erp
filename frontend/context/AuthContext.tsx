@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { API_BASE_URL } from "@/lib/api";
 
 type User = {
   _id: string;
@@ -27,23 +28,58 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem("token");
-    const storedUser = localStorage.getItem("user");
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
-    }
-    setLoading(false);
+    const initAuth = async () => {
+      const storedToken = localStorage.getItem("token");
+      const storedUser = localStorage.getItem("user");
+
+      if (storedToken && storedUser) {
+        setToken(storedToken);
+        try {
+          setUser(JSON.parse(storedUser));
+          const res = await fetch(`${API_BASE_URL}/auth/me`, {
+            headers: { Authorization: `Bearer ${storedToken}` },
+          });
+
+          if (res.status === 401) {
+            // Stale or invalid token
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            setToken(null);
+            setUser(null);
+          } else if (res.ok) {
+            const freshUser = await res.json();
+            setUser(freshUser);
+            localStorage.setItem("user", JSON.stringify(freshUser));
+          }
+        } catch (e) {
+          // If network error, preserve cached state
+        }
+      }
+      setLoading(false);
+    };
+
+    initAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+    let res: Response;
+    try {
+      res = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+    } catch (err: any) {
+      throw new Error(`Unable to connect to backend server at ${API_BASE_URL}. Ensure backend is running.`);
+    }
+
+    const contentType = res.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      throw new Error(`Server returned unexpected response (${res.status}). Please check backend service.`);
+    }
+
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message);
+    if (!res.ok) throw new Error(data.message || "Login failed");
     setToken(data.token);
     setUser(data);
     localStorage.setItem("token", data.token);

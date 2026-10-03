@@ -9,9 +9,11 @@ import {
   UserPlus,
   Calendar,
   FileText,
+  Settings,
   LogOut,
   Menu,
   X,
+  ShieldAlert
 } from "lucide-react";
 import { useState } from "react";
 
@@ -20,12 +22,17 @@ export const Sidebar = () => {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 
+  const isSuperAdmin = user?.role === "super_admin";
+  const isAdmin = user?.role === "admin" || isSuperAdmin;
+
   const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/admissions", label: "Admissions", icon: UserPlus },
     { href: "/students", label: "Students", icon: Users },
-    { href: "/faculty", label: "Faculty", icon: Users },
+    { href: "/faculty", label: "Faculty & Staff", icon: Users },
     { href: "/sessions", label: "Sessions", icon: Calendar },
+    ...(isAdmin ? [{ href: "/audit-logs", label: "Audit Logs", icon: FileText }] : []),
+    ...(isSuperAdmin ? [{ href: "/settings", label: "Settings", icon: Settings }] : []),
   ];
 
   return (
@@ -76,7 +83,15 @@ export const Sidebar = () => {
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700">
           <div className="mb-4">
             <p className="font-semibold text-lg">{user?.name}</p>
-            <p className="text-sm text-slate-300 capitalize">{user?.role}</p>
+            <div className="flex items-center gap-2 mt-1">
+              <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                isSuperAdmin 
+                  ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                  : "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+              }`}>
+                {user?.role?.replace("_", " ")}
+              </span>
+            </div>
           </div>
           <button
             onClick={logout}

@@ -3,7 +3,8 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
-import { Edit2, X } from "lucide-react";
+import { Edit2, X, Plus, Archive, PowerOff, ShieldCheck, AlertCircle, CheckCircle2 } from "lucide-react";
+import { API_BASE_URL } from "@/lib/api";
 
 type Session = {
   _id: string;
@@ -12,16 +13,30 @@ type Session = {
   endDate: string;
   admissionOpen: boolean;
   allowedClasses: string[];
-  status: string;
+  status: "active" | "inactive" | "archived";
 };
 
 export default function Sessions() {
-  const { token } = useAuth();
+  const { user, token } = useAuth();
+  const isSuperAdmin = user?.role === "super_admin";
+
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  // Modals
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [actionModal, setActionModal] = useState<{
+    type: "close" | "archive";
+    session: Session;
+  } | null>(null);
+
   const [editingSession, setEditingSession] = useState<Session | null>(null);
+  const [actionSecurityCode, setActionSecurityCode] = useState("");
+
   const [editForm, setEditForm] = useState({
     sessionName: "",
     startDate: "",
@@ -30,43 +45,48 @@ export default function Sessions() {
     allowedClasses: [] as string[],
     securityCode: "",
   });
+
   const [createForm, setCreateForm] = useState({
     sessionName: "",
     startDate: "",
     endDate: "",
-    admissionOpen: false,
-    allowedClasses: [] as string[],
+    admissionOpen: true,
+    allowedClasses: ["8", "9"] as string[],
     securityCode: "",
   });
 
-  useEffect(() => {
-    const fetchSessions = async () => {
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/sessions`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        const data = await res.json();
+  const fetchSessions = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`${API_BASE_URL}/sessions`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (Array.isArray(data)) {
         setSessions(data);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (err) {
+      console.error(err);
+      setError("Failed to fetch academic sessions");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     if (token) fetchSessions();
   }, [token]);
 
   const handleEditClick = (session: Session) => {
+    setError("");
+    setSuccess("");
     setEditingSession(session);
     setEditForm({
       sessionName: session.sessionName,
-      startDate: new Date(session.startDate).toISOString().split("T")[0],
-      endDate: new Date(session.endDate).toISOString().split("T")[0],
+      startDate: session.startDate.split("T")[0],
+      endDate: session.endDate.split("T")[0],
       admissionOpen: session.admissionOpen,
-      allowedClasses: session.allowedClasses,
+      allowedClasses: session.allowedClasses || [],
       securityCode: "",
     });
     setIsEditModalOpen(true);
@@ -75,28 +95,102 @@ export default function Sessions() {
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingSession) return;
+    setError("");
+    setSuccess("");
+    setSubmitting(true);
 
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/sessions/${editingSession._id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(editForm),
-        }
-      );
+      const res = await fetch(`${API_BASE_URL}/sessions/${editingSession._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(editForm),
+      });
 
-      if (res.ok) {
-        const updated = await res.json();
-        setSessions(sessions.map((s) => s._id === updated._id ? updated : s));
-        setIsEditModalOpen(false);
-        setEditingSession(null);
-      }
-    } catch (error) {
-      console.error(error);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to update session");
+
+      setSessions(sessions.map((s) => (s._id === data._id ? data : s)));
+      setSuccess("Session updated successfully!");
+      setIsEditModalOpen(false);
+      setEditingSession(null);
+    } catch (err: any) {
+      setError(err.message || "Error updating session");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleCreateSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+    setSubmitting(true);
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/sessions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(createForm),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to create session");
+
+      setSessions([data, ...sessions]);
+      setSuccess("Academic session created successfully!");
+      setIsCreateModalOpen(false);
+      setCreateForm({
+        sessionName: "",
+        startDate: "",
+        endDate: "",
+        admissionOpen: true,
+        allowedClasses: ["8", "9"],
+        securityCode: "",
+      });
+    } catch (err: any) {
+      setError(err.message || "Error creating session");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleActionConfirm = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!actionModal) return;
+    setError("");
+    setSuccess("");
+    setSubmitting(true);
+
+    const { type, session } = actionModal;
+    const endpoint = type === "close" ? "close" : "archive";
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/sessions/${session._id}/${endpoint}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ securityCode: actionSecurityCode }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || `Failed to ${type} session`);
+
+      setSuccess(`Session ${type === "close" ? "closed" : "archived"} successfully!`);
+      setActionModal(null);
+      setActionSecurityCode("");
+      fetchSessions();
+    } catch (err: any) {
+      setError(err.message || `Failed to ${type} session`);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -118,133 +212,168 @@ export default function Sessions() {
     }));
   };
 
-  const handleCreateSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/sessions`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(createForm),
-        }
-      );
-
-      if (res.ok) {
-        const newSession = await res.json();
-        setSessions([newSession, ...sessions]);
-        setIsCreateModalOpen(false);
-        setCreateForm({
-          sessionName: "",
-          startDate: "",
-          endDate: "",
-          admissionOpen: false,
-          allowedClasses: [],
-          securityCode: "",
-        });
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   return (
     <DashboardLayout>
-      <div>
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">
-            Academic Sessions
-          </h1>
-          <button
-            onClick={() => {
-              setIsCreateModalOpen(true);
-            }}
-            className="btn btn-primary flex items-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Create New Session
-          </button>
+      <div className="space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Academic Sessions</h1>
+            <p className="text-sm text-slate-500 mt-1">
+              Configure school academic years, admission windows, and class offerings
+            </p>
+          </div>
+
+          {isSuperAdmin && (
+            <button
+              onClick={() => {
+                setError("");
+                setSuccess("");
+                setIsCreateModalOpen(true);
+              }}
+              className="btn btn-primary flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md hover:shadow-lg transition-all"
+            >
+              <Plus className="w-5 h-5" />
+              Create New Session
+            </button>
+          )}
         </div>
 
+        {/* Alerts */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
+        {success && (
+          <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-xl flex items-center gap-3">
+            <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
+            <span>{success}</span>
+          </div>
+        )}
+
         {loading ? (
-          <div className="flex items-center justify-center py-12">
+          <div className="flex items-center justify-center py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {sessions.map((session) => (
-              <div key={session._id} className="card p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      {session.sessionName}
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      {new Date(session.startDate).toLocaleDateString()} -{" "}
-                      {new Date(session.endDate).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
+              <div
+                key={session._id}
+                className="card p-6 border border-slate-100 hover:shadow-lg transition-all flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h3 className="text-xl font-bold text-slate-900">{session.sessionName}</h3>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        {new Date(session.startDate).toLocaleDateString()} —{" "}
+                        {new Date(session.endDate).toLocaleDateString()}
+                      </p>
+                    </div>
                     <span
-                      className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                      className={`px-3 py-1 text-xs font-bold rounded-full capitalize ${
                         session.status === "active"
-                          ? "bg-green-100 text-green-800"
+                          ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
                           : session.status === "archived"
-                          ? "bg-gray-100 text-gray-800"
-                          : "bg-yellow-100 text-yellow-800"
+                          ? "bg-slate-100 text-slate-700 border border-slate-200"
+                          : "bg-amber-100 text-amber-800 border border-amber-200"
                       }`}
                     >
                       {session.status}
                     </span>
+                  </div>
+
+                  <div className="space-y-3 mt-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold text-slate-500">Admissions:</span>
+                      <span
+                        className={`text-xs px-2.5 py-0.5 rounded-full font-bold ${
+                          session.admissionOpen
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-slate-100 text-slate-600"
+                        }`}
+                      >
+                        {session.admissionOpen ? "Open" : "Closed"}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-xs font-semibold text-slate-500 block mb-1">
+                        Allowed Classes:
+                      </span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {session.allowedClasses?.map((cls) => (
+                          <span
+                            key={cls}
+                            className="px-2.5 py-0.5 bg-slate-100 text-slate-700 font-semibold text-xs rounded-lg"
+                          >
+                            Class {cls}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {isSuperAdmin && (
+                  <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between gap-2">
                     <button
                       onClick={() => handleEditClick(session)}
-                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                      className="btn btn-secondary py-1.5 px-3 text-xs flex items-center gap-1.5 font-semibold text-slate-700"
                     >
-                      <Edit2 className="w-4 h-4" />
+                      <Edit2 className="w-3.5 h-3.5" />
+                      Edit
                     </button>
-                  </div>
-                </div>
 
-                {session.admissionOpen && (
-                  <div className="mb-4">
-                    <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
-                      Admission Open
-                    </span>
+                    <div className="flex items-center gap-2">
+                      {session.status === "active" && (
+                        <button
+                          onClick={() => {
+                            setActionSecurityCode("");
+                            setError("");
+                            setActionModal({ type: "close", session });
+                          }}
+                          className="py-1.5 px-3 text-xs font-semibold rounded-xl text-amber-700 bg-amber-50 hover:bg-amber-100 transition-all flex items-center gap-1"
+                          title="Close Session (Disable admissions)"
+                        >
+                          <PowerOff className="w-3.5 h-3.5" />
+                          Close
+                        </button>
+                      )}
+
+                      {session.status !== "archived" && (
+                        <button
+                          onClick={() => {
+                            setActionSecurityCode("");
+                            setError("");
+                            setActionModal({ type: "archive", session });
+                          }}
+                          className="py-1.5 px-3 text-xs font-semibold rounded-xl text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all flex items-center gap-1"
+                          title="Archive Session"
+                        >
+                          <Archive className="w-3.5 h-3.5" />
+                          Archive
+                        </button>
+                      )}
+                    </div>
                   </div>
                 )}
-
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Allowed Classes:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {session.allowedClasses.map((c) => (
-                      <span
-                        key={c}
-                        className="px-2 py-1 bg-gray-100 text-gray-800 text-sm rounded"
-                      >
-                        Class {c}
-                      </span>
-                    ))}
-                  </div>
-                </div>
               </div>
             ))}
           </div>
         )}
 
         {/* Edit Modal */}
-        {isEditModalOpen && (
+        {isEditModalOpen && editingSession && (
           <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full">
-              <div className="flex justify-between items-center p-6 border-b border-slate-100">
-                <h2 className="text-xl font-bold text-slate-900">Edit Session</h2>
+            <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center p-6 border-b border-slate-100 sticky top-0 bg-white z-10">
+                <h2 className="text-xl font-bold text-slate-900">Edit Academic Session</h2>
                 <button
                   onClick={() => setIsEditModalOpen(false)}
-                  className="p-2 hover:bg-slate-100 rounded-lg transition-all"
+                  className="p-2 hover:bg-slate-100 rounded-xl transition-all"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -252,71 +381,60 @@ export default function Sessions() {
 
               <form onSubmit={handleEditSubmit} className="p-6 space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">
                     Session Name
                   </label>
                   <input
                     type="text"
                     value={editForm.sessionName}
-                    onChange={(e) =>
-                      setEditForm({ ...editForm, sessionName: e.target.value })
-                    }
-                    className="input"
+                    onChange={(e) => setEditForm({ ...editForm, sessionName: e.target.value })}
+                    className="input w-full"
                     required
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">
                       Start Date
                     </label>
                     <input
                       type="date"
                       value={editForm.startDate}
-                      onChange={(e) =>
-                        setEditForm({ ...editForm, startDate: e.target.value })
-                      }
-                      className="input"
+                      onChange={(e) => setEditForm({ ...editForm, startDate: e.target.value })}
+                      className="input w-full"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">
                       End Date
                     </label>
                     <input
                       type="date"
                       value={editForm.endDate}
-                      onChange={(e) =>
-                        setEditForm({ ...editForm, endDate: e.target.value })
-                      }
-                      className="input"
+                      onChange={(e) => setEditForm({ ...editForm, endDate: e.target.value })}
+                      className="input w-full"
                       required
                     />
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 py-1">
                   <input
                     type="checkbox"
-                    id="admissionOpen"
+                    id="editAdmissionOpen"
                     checked={editForm.admissionOpen}
-                    onChange={(e) =>
-                      setEditForm({ ...editForm, admissionOpen: e.target.checked })
-                    }
+                    onChange={(e) => setEditForm({ ...editForm, admissionOpen: e.target.checked })}
                     className="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                   />
-                  <label
-                    htmlFor="admissionOpen"
-                    className="text-sm font-medium text-slate-700"
-                  >
-                    Admission Open
+                  <label htmlFor="editAdmissionOpen" className="text-sm font-semibold text-slate-700">
+                    Open for Admissions
                   </label>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-3">
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
                     Allowed Classes
                   </label>
                   <div className="flex flex-wrap gap-2">
@@ -325,9 +443,9 @@ export default function Sessions() {
                         key={cls}
                         type="button"
                         onClick={() => handleClassToggle(cls)}
-                        className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                        className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
                           editForm.allowedClasses.includes(cls)
-                            ? "bg-blue-600 text-white"
+                            ? "bg-blue-600 text-white shadow-sm"
                             : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                         }`}
                       >
@@ -338,22 +456,21 @@ export default function Sessions() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Security Code
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                    Super Admin Security Code *
                   </label>
                   <input
                     type="password"
                     value={editForm.securityCode}
-                    onChange={(e) =>
-                      setEditForm({ ...editForm, securityCode: e.target.value })
-                    }
-                    className="input"
-                    placeholder="Enter security code"
+                    onChange={(e) => setEditForm({ ...editForm, securityCode: e.target.value })}
+                    className="input w-full"
+                    placeholder="Enter security code (e.g. admin123)"
                     required
                   />
+                  <p className="text-xs text-slate-400 mt-1">Default security code is admin123</p>
                 </div>
 
-                <div className="flex gap-3 pt-4">
+                <div className="flex gap-3 pt-4 border-t border-slate-100">
                   <button
                     type="button"
                     onClick={() => setIsEditModalOpen(false)}
@@ -361,8 +478,12 @@ export default function Sessions() {
                   >
                     Cancel
                   </button>
-                  <button type="submit" className="btn btn-primary flex-1">
-                    Save Changes
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="btn btn-primary flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold"
+                  >
+                    {submitting ? "Saving..." : "Save Changes"}
                   </button>
                 </div>
               </form>
@@ -373,12 +494,12 @@ export default function Sessions() {
         {/* Create Modal */}
         {isCreateModalOpen && (
           <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full">
-              <div className="flex justify-between items-center p-6 border-b border-slate-100">
-                <h2 className="text-xl font-bold text-slate-900">Create New Session</h2>
+            <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center p-6 border-b border-slate-100 sticky top-0 bg-white z-10">
+                <h2 className="text-xl font-bold text-slate-900">Create Academic Session</h2>
                 <button
                   onClick={() => setIsCreateModalOpen(false)}
-                  className="p-2 hover:bg-slate-100 rounded-lg transition-all"
+                  className="p-2 hover:bg-slate-100 rounded-xl transition-all"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -386,53 +507,47 @@ export default function Sessions() {
 
               <form onSubmit={handleCreateSubmit} className="p-6 space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Session Name
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                    Session Name (e.g. 2026-2027) *
                   </label>
                   <input
                     type="text"
-                    value={createForm.sessionName}
-                    onChange={(e) =>
-                      setCreateForm({ ...createForm, sessionName: e.target.value })
-                    }
-                    className="input"
-                    placeholder="e.g. 2026-2027"
                     required
+                    value={createForm.sessionName}
+                    onChange={(e) => setCreateForm({ ...createForm, sessionName: e.target.value })}
+                    className="input w-full"
+                    placeholder="2026-2027"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                      Start Date
+                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                      Start Date *
                     </label>
                     <input
                       type="date"
-                      value={createForm.startDate}
-                      onChange={(e) =>
-                        setCreateForm({ ...createForm, startDate: e.target.value })
-                      }
-                      className="input"
                       required
+                      value={createForm.startDate}
+                      onChange={(e) => setCreateForm({ ...createForm, startDate: e.target.value })}
+                      className="input w-full"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                      End Date
+                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                      End Date *
                     </label>
                     <input
                       type="date"
-                      value={createForm.endDate}
-                      onChange={(e) =>
-                        setCreateForm({ ...createForm, endDate: e.target.value })
-                      }
-                      className="input"
                       required
+                      value={createForm.endDate}
+                      onChange={(e) => setCreateForm({ ...createForm, endDate: e.target.value })}
+                      className="input w-full"
                     />
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 py-1">
                   <input
                     type="checkbox"
                     id="createAdmissionOpen"
@@ -442,16 +557,13 @@ export default function Sessions() {
                     }
                     className="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                   />
-                  <label
-                    htmlFor="createAdmissionOpen"
-                    className="text-sm font-medium text-slate-700"
-                  >
-                    Admission Open
+                  <label htmlFor="createAdmissionOpen" className="text-sm font-semibold text-slate-700">
+                    Open for Admissions
                   </label>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-3">
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
                     Allowed Classes
                   </label>
                   <div className="flex flex-wrap gap-2">
@@ -460,9 +572,9 @@ export default function Sessions() {
                         key={cls}
                         type="button"
                         onClick={() => handleCreateClassToggle(cls)}
-                        className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                        className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
                           createForm.allowedClasses.includes(cls)
-                            ? "bg-blue-600 text-white"
+                            ? "bg-blue-600 text-white shadow-sm"
                             : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                         }`}
                       >
@@ -473,22 +585,23 @@ export default function Sessions() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Security Code
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                    Super Admin Security Code *
                   </label>
                   <input
                     type="password"
+                    required
                     value={createForm.securityCode}
                     onChange={(e) =>
                       setCreateForm({ ...createForm, securityCode: e.target.value })
                     }
-                    className="input"
-                    placeholder="Enter security code"
-                    required
+                    className="input w-full"
+                    placeholder="Enter security code (e.g. admin123)"
                   />
+                  <p className="text-xs text-slate-400 mt-1">Default security code is admin123</p>
                 </div>
 
-                <div className="flex gap-3 pt-4">
+                <div className="flex gap-3 pt-4 border-t border-slate-100">
                   <button
                     type="button"
                     onClick={() => setIsCreateModalOpen(false)}
@@ -496,8 +609,82 @@ export default function Sessions() {
                   >
                     Cancel
                   </button>
-                  <button type="submit" className="btn btn-primary flex-1">
-                    Create Session
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="btn btn-primary flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold"
+                  >
+                    {submitting ? "Creating..." : "Create Session"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Action Modal (Close / Archive) */}
+        {actionModal && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div
+                  className={`p-3 rounded-2xl ${
+                    actionModal.type === "close"
+                      ? "bg-amber-100 text-amber-600"
+                      : "bg-slate-100 text-slate-600"
+                  }`}
+                >
+                  <ShieldCheck className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900 capitalize">
+                    {actionModal.type} Academic Session
+                  </h3>
+                  <p className="text-xs text-slate-500">Super Admin authorization required</p>
+                </div>
+              </div>
+
+              <p className="text-sm text-slate-600 mb-4">
+                Are you sure you want to {actionModal.type} session{" "}
+                <strong className="text-slate-900">{actionModal.session.sessionName}</strong>?
+                {actionModal.type === "close"
+                  ? " This will stop active admissions for this session."
+                  : " This will mark the session as archived."}
+              </p>
+
+              <form onSubmit={handleActionConfirm} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                    Security Code *
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    placeholder="Enter admin security code"
+                    value={actionSecurityCode}
+                    onChange={(e) => setActionSecurityCode(e.target.value)}
+                    className="input w-full"
+                  />
+                  <p className="text-xs text-slate-400 mt-1">Default security code is admin123</p>
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActionModal(null);
+                      setActionSecurityCode("");
+                    }}
+                    className="btn btn-secondary flex-1"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submitting || !actionSecurityCode}
+                    className="btn btn-primary flex-1 capitalize bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold"
+                  >
+                    {submitting ? "Processing..." : `Confirm ${actionModal.type}`}
                   </button>
                 </div>
               </form>

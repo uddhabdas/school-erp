@@ -20,8 +20,8 @@ router.post('/', upload.fields([
 ]), createApplication);
 router.get('/', protect, getApplications);
 router.get('/:id', protect, getApplicationById);
-router.put('/:id', protect, updateApplication);
-router.put('/:id/approve', protect, authorize('super_admin', 'admin', 'faculty'), approveApplication);
-router.put('/:id/reject', protect, authorize('super_admin', 'admin', 'faculty'), rejectApplication);
+router.put('/:id', protect, authorize('super_admin', 'admin', 'faculty'), updateApplication);
+router.put('/:id/approve', protect, authorize('super_admin'), approveApplication);
+router.put('/:id/reject', protect, authorize('super_admin', 'admin'), rejectApplication);
 
 module.exports = router;

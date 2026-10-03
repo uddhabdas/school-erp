@@ -5,6 +5,7 @@ const connectDB = require('./utils/db');
 
 const authRoutes = require('./routes/authRoutes');
 const studentAuthRoutes = require('./routes/studentAuthRoutes');
+const parentAuthRoutes = require('./routes/parentAuthRoutes');
 const academicSessionRoutes = require('./routes/academicSessionRoutes');
 const admissionRoutes = require('./routes/admissionRoutes');
 const studentRoutes = require('./routes/studentRoutes');
@@ -25,6 +26,7 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/student-auth', studentAuthRoutes);
+app.use('/api/parent-auth', parentAuthRoutes);
 app.use('/api/sessions', academicSessionRoutes);
 app.use('/api/admissions', admissionRoutes);
 app.use('/api/students', studentRoutes);

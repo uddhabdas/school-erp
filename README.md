@@ -116,13 +116,15 @@ npm install
 
 3. Create `.env` file:
 ```env
-PORT=5000
+PORT=5001
 MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/school-erp
 JWT_SECRET=your_jwt_secret_key_here
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
 ```
+
+> **Note for macOS Users:** macOS AirPlay Receiver uses port 5000 by default. Port 5001 is used to avoid port collisions.
 
 4. Seed the database (creates admin user and default session):
 ```bash
@@ -152,7 +154,7 @@ npm install
 
 3. Create `.env.local` file:
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:5000/api
+NEXT_PUBLIC_API_URL=http://localhost:5001/api
 ```
 
 4. Start the development server:
@@ -169,12 +171,14 @@ npm run build
 
 After seeding the database:
 
-| Role | Email | Password |
-|------|-------|----------|
+| Role | Email / Identifier | Password |
+|------|--------------------|----------|
 | Super Admin | principal@school.com | admin123 |
 | Admin | admin@school.com | admin123 |
+| Student | 2345678903 (Aadhaar / Adm No) | 01-01-2010 (DOB: DD-MM-YYYY) |
+| Parent | 9876543201 (Registered Mobile) | 01-01-2010 (Child DOB) / parent123 |
 
-**Security Code**: admin123
+**Master Security Code**: admin123
 
 ## User Roles & Permissions
 
