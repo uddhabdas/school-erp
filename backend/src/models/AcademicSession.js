@@ -19,8 +19,47 @@ const academicSessionSchema = new mongoose.Schema({
     default: false
   },
   allowedClasses: [{
-    type: String,
-    enum: ['8', '9', '10']
+    type: String
+  }],
+  classConfigs: [{
+    className: {
+      type: String,
+      required: true
+    },
+    sections: {
+      type: [String],
+      default: ['A']
+    },
+    subjects: [{
+      subjectCode: {
+        type: String,
+        default: ''
+      },
+      subjectName: {
+        type: String,
+        required: true
+      },
+      isOptional: {
+        type: Boolean,
+        default: false
+      },
+      assignedTeacher: {
+        type: String,
+        default: ''
+      },
+      assignedTeacherId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      }
+    }],
+    admissionOpen: {
+      type: Boolean,
+      default: true
+    },
+    capacity: {
+      type: Number,
+      default: 60
+    }
   }],
   status: {
     type: String,

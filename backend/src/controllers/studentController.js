@@ -3,19 +3,21 @@ const StudentAcademicHistory = require('../models/StudentAcademicHistory');
 const logAction = require('../utils/auditLogger');
 const bcrypt = require('bcryptjs');
 
-// @desc    Get all students with search & filter
+const { escapeRegex } = require('../utils/sanitize');
+
+// @desc    Get all students with search & filter (and optional pagination)
 // @route   GET /api/students
 // @access  Private
 const getStudents = async (req, res) => {
   try {
-    const { search, status, class: studentClass, sessionId } = req.query;
+    const { search, status, class: studentClass, sessionId, page, limit } = req.query;
     const query = {};
 
-    if (status) {
+    if (status && status !== 'all') {
       query.status = status;
     }
 
-    if (studentClass) {
+    if (studentClass && studentClass !== 'all') {
       query['academic.class'] = studentClass;
     }
 
@@ -23,8 +25,8 @@ const getStudents = async (req, res) => {
       query['academic.sessionId'] = sessionId;
     }
 
-    if (search) {
-      const searchRegex = { $regex: search, $options: 'i' };
+    if (search && search.trim() !== '') {
+      const searchRegex = { $regex: escapeRegex(search.trim()), $options: 'i' };
       query.$or = [
         { 'personal.name': searchRegex },
         { studentId: searchRegex },
@@ -34,10 +36,38 @@ const getStudents = async (req, res) => {
       ];
     }
 
-    const students = await Student.find(query)
-      .select('-password')
-      .sort({ createdAt: -1 });
+    if (page) {
+      const pageNum = Math.max(1, parseInt(page, 10) || 1);
+      const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 20));
+      const skip = (pageNum - 1) * limitNum;
 
+      const [students, total] = await Promise.all([
+        Student.find(query)
+          .select('-password')
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(limitNum),
+        Student.countDocuments(query)
+      ]);
+
+      return res.json({
+        students,
+        total,
+        page: pageNum,
+        totalPages: Math.ceil(total / limitNum)
+      });
+    }
+
+    let studentQuery = Student.find(query)
+      .select('-password')
+      .sort({ 'academic.class': 1, 'academic.rollNo': 1, 'personal.name': 1 });
+
+    if (limit) {
+      const limitNum = Math.min(200, Math.max(1, parseInt(limit, 10)));
+      studentQuery = studentQuery.limit(limitNum);
+    }
+
+    const students = await studentQuery;
     res.json(students);
   } catch (error) {
     console.error('Error in getStudents:', error);
@@ -102,6 +132,24 @@ const updateStudent = async (req, res) => {
       { $set: updateData },
       { new: true, runValidators: true }
     ).select('-password');
+
+    // Automatically record pass out event in academic history
+    if (updateData.status === 'passed_out' && oldData.status !== 'passed_out') {
+      try {
+        await StudentAcademicHistory.create({
+          studentId: student._id,
+          oldSession: student.academic?.sessionName,
+          oldClass: student.academic?.class,
+          newSession: student.academic?.sessionName,
+          newClass: student.academic?.class,
+          passedOutBatch: student.academic?.sessionName || new Date().getFullYear().toString(),
+          promotedBy: req.user._id,
+          promotedAt: new Date()
+        });
+      } catch (histErr) {
+        console.error('Error recording pass out history:', histErr);
+      }
+    }
 
     await logAction(
       req.user._id,

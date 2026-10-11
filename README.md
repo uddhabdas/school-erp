@@ -28,17 +28,56 @@ A comprehensive School Management System built for **Dulichand Sonadevi High Sch
 - Salary history tracking
 - Document management
 
-### Promotion System
-- Promote students to next class
-- Pass out class 10 students
-- Maintain academic history
-- Security code protected
+### Fee Management & Billing
+- Configurable Fee Heads (Tuition, Annual Development, Exam, Science Lab, Board Registration) per class or all classes
+- Real-time student fee ledger with Total Fee, Total Paid, and Outstanding Balance Due
+- Intelligent Fee Heads breakdown with paid vs pending status and 1-click counter auto-fill
+- Resilient cashier collection counter with support for ObjectId, Student ID (`STU-XXXX`), or Admission Number lookup
+- Multi-mode payment support: Cash (Office Counter), UPI / QR Code, Bank Transfer / NEFT, Cheque, and Online Portal
+- Atomic, collision-free receipt number generation (`REC-YYYY-XXXXX`)
+- Official Board-standard printable Cashier Money Receipts with school header, fee particulars, and authorized signatures (with isolated `@media print` layout)
+- Integrated ledger view in Student and Parent portals with full transaction history
+
+### Examinations & Report Card / Marksheet Generation
+- Class-wise Student Directory & Academic Marksheets view (Class 8, Class 9, Class 10, All Classes) independent of academic session
+- Quick Class Switcher tabs with live student counts and section filtering
+- Instant marksheet performance summary per student with 1-click report card printing
+- Examination lifecycle management (Unit Test, Half-Yearly, Annual, Pre-Board) per class cohort
+- Standard BSE Odisha aligned 6-subject curriculum setup with customizable maximum and pass marks
+- Interactive, spreadsheet-style marks entry grid with automatic calculation of aggregate marks, percentage, letter grades (A1 to F), and pass/compartment/fail status
+- Class merit ranking table with rank badges, division calculations, and CSV marksheet export
+- Official Board-standard printable Student Progress Report Cards (A4 format) with 5T Odisha transformation header, student profile, marks breakdown, teacher remarks, grading scale, and authorized signature blocks
+- Integrated student and parent portals for viewing published exam results and printing report cards
+
+### Transfer Certificate (TC) & Bonafide Generator
+- Sequential atomic serial generation for official certificates (`TC-2026-0001`, `BON-2026-0001`, `CHAR-2026-0001`)
+- Automatic date-of-birth to words conversion (e.g., "FIRST JANUARY TWO THOUSAND TEN")
+- Complete 18-point Secondary School Certificate print layout aligned with Board of Secondary Education (BSE), Odisha standards
+- Option to automatically mark outgoing students as "Transferred" in the main school directory
+
+### Public Admission Status Tracker & Printable Slip
+- Dedicated public tracking portal (`/track-admission`) for applicants to check scrutiny progress (Submitted -> Document Verification -> Headmaster Review -> Seat Allotted)
+- Verification by Application Registration Number + Date of Birth
+- Official printable Admission Acknowledgment Slip (A4) with physical document checklist, photo box, and parent counter foil
+
+### Class Timetable & Routine Management
+- 7-period daily timetable (Mon - Sat) per class cohort and section
+- Period time-slots, subject color badges, and faculty assignment
+- One-click official A4 printable routine for classroom display boards
+- Direct routine view for students in the student dashboard
+
+### Student ID Cards & Data Export
+- One-click printable Student Identity Cards with student photo and barcode visual
+- Instant CSV export for the Student Directory for district reporting and offline records
 
 ### Security & Audit
-- JWT authentication
-- Role-based access control (Super Admin, Admin, Faculty)
-- Security code for critical operations
-- Audit logs for all actions
+- JWT authentication with secure invalid-token rejection
+- Helmet security HTTP headers & origin protection
+- Rate-limiting on authentication and login endpoints to prevent brute-force attacks
+- Safe regex query sanitization to protect against ReDoS
+- Atomic sequence generation counters to prevent ID collisions
+- Multer support for both images and PDF certificates
+- Audit logs for all administrative actions
 
 ## Tech Stack
 

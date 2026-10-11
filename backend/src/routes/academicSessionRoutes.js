@@ -4,6 +4,7 @@ const {
   getActiveSession,
   createSession,
   updateSession,
+  updateSessionClasses,
   closeSession,
   archiveSession
 } = require('../controllers/academicSessionController');
@@ -13,8 +14,9 @@ const router = express.Router();
 
 router.get('/', protect, getSessions);
 router.get('/active', getActiveSession);
-router.post('/', protect, authorize('super_admin'), createSession);
-router.put('/:id', protect, authorize('super_admin'), updateSession);
+router.post('/', protect, authorize('super_admin', 'admin'), createSession);
+router.put('/:id', protect, authorize('super_admin', 'admin'), updateSession);
+router.put('/:id/classes', protect, authorize('super_admin', 'admin'), updateSessionClasses);
 router.put('/:id/close', protect, authorize('super_admin'), closeSession);
 router.put('/:id/archive', protect, authorize('super_admin'), archiveSession);
 

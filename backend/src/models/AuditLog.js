@@ -22,7 +22,8 @@ const auditLogSchema = new mongoose.Schema({
     default: Date.now
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  suppressReservedKeysWarning: true
 });
 
 module.exports = mongoose.model('AuditLog', auditLogSchema);

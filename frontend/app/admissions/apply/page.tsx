@@ -2,7 +2,19 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { GraduationCap, User, Users, MapPin, FileText, CreditCard } from "lucide-react";
+import {
+  GraduationCap,
+  User,
+  Users,
+  MapPin,
+  FileText,
+  CreditCard,
+  Loader2,
+  CheckCircle2,
+  Sparkles,
+  AlertCircle,
+  Check
+} from "lucide-react";
 import { API_BASE_URL } from "@/lib/api";
 
 type Session = {
@@ -11,6 +23,25 @@ type Session = {
   allowedClasses: string[];
   admissionOpen: boolean;
 };
+
+// Comprehensive list of school classes
+const STANDARD_CLASSES = [
+  "Nursery",
+  "LKG",
+  "UKG",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "11",
+  "12"
+];
 
 // List of districts in Odisha
 const ODISHA_DISTRICTS = [
@@ -24,10 +55,10 @@ const ODISHA_DISTRICTS = [
   "CUTTACK",
   "JAGATSINGHPUR",
   "JAJAPUR",
-  "KENDRApara",
+  "KENDRAPARA",
   "NAYAGARH",
   "PURI",
-  "KHAORDHA",
+  "KHORDHA",
   "GANJAM",
   "GAJAPATI",
   "KANDHAMAL",
@@ -38,14 +69,11 @@ const ODISHA_DISTRICTS = [
   "BARAGARH",
   "JHARSUGUDA",
   "SAMBALPUR",
-  "DEOGARH",
-  "BAUDH",
   "MALKANGIRI",
   "KORAPUT",
   "NABARANGPUR",
   "RAYAGADA",
   "KALAHANDI",
-  "NUAPADA",
   "Other"
 ];
 
@@ -65,6 +93,21 @@ const BALASORE_BLOCKS = [
   "Other"
 ];
 
+// Offline fallback dictionary for common local Odisha pincodes
+const LOCAL_PINCODES: Record<string, { state: string; district: string; block: string; post: string }> = {
+  "756029": { state: "ODISHA", district: "BALASORE", block: "BASTA", post: "BASTA" },
+  "756001": { state: "ODISHA", district: "BALASORE", block: "BALASORE SADAR", post: "BALASORE" },
+  "756002": { state: "ODISHA", district: "BALASORE", block: "BALASORE SADAR", post: "BALASORE COLLEGE" },
+  "756003": { state: "ODISHA", district: "BALASORE", block: "REMOUNA", post: "REMOUNA" },
+  "756030": { state: "ODISHA", district: "BALASORE", block: "BASTA", post: "AMARDA" },
+  "756032": { state: "ODISHA", district: "BALASORE", block: "JALESWAR", post: "JALESWAR" },
+  "756040": { state: "ODISHA", district: "BALASORE", block: "BHANJANAGAR", post: "CHANDIPUR" },
+  "756055": { state: "ODISHA", district: "BALASORE", block: "SORO", post: "SORO" },
+  "756056": { state: "ODISHA", district: "BALASORE", block: "SIMULIA", post: "SIMULIA" },
+  "756100": { state: "ODISHA", district: "BHADRAK", block: "BHADRAK", post: "BHADRAK" },
+  "751001": { state: "ODISHA", district: "KHORDHA", block: "BHUBANESWAR", post: "BHUBANESWAR GPO" }
+};
+
 export default function ApplyAdmission() {
   const [session, setSession] = useState<Session | null>(null);
   const [step, setStep] = useState(1);
@@ -73,6 +116,13 @@ export default function ApplyAdmission() {
   const [success, setSuccess] = useState(false);
   const [showDistrictOther, setShowDistrictOther] = useState(false);
   const [showBlockOther, setShowBlockOther] = useState(false);
+
+  // Pincode auto-fill states
+  const [pincodeLoading, setPincodeLoading] = useState(false);
+  const [pincodeAutoFilled, setPincodeAutoFilled] = useState(false);
+  const [pincodeError, setPincodeError] = useState("");
+  const [postOfficesList, setPostOfficesList] = useState<any[]>([]);
+
   const [formData, setFormData] = useState({
     class: "",
     previousSchool: "",
@@ -121,6 +171,105 @@ export default function ApplyAdmission() {
     };
     fetchSession();
   }, []);
+
+  // Numeric-only handler for Aadhaar (12 digits)
+  const handleAadhaarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const numeric = e.target.value.replace(/\D/g, "").slice(0, 12);
+    setFormData(prev => ({ ...prev, aadhaar: numeric }));
+  };
+
+  // Numeric-only handler for Student Phone Number (10 digits)
+  const handleMobileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const numeric = e.target.value.replace(/\D/g, "").slice(0, 10);
+    setFormData(prev => ({ ...prev, mobile: numeric }));
+  };
+
+  // Numeric-only handler for Parent's Mobile (10 digits)
+  const handleParentMobileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const numeric = e.target.value.replace(/\D/g, "").slice(0, 10);
+    setFormData(prev => ({ ...prev, parentMobile: numeric }));
+  };
+
+  // Pincode lookup & auto-fill
+  const lookupPincode = async (pin: string) => {
+    if (pin.length !== 6) return;
+    setPincodeLoading(true);
+    setPincodeError("");
+    try {
+      const res = await fetch(`https://api.postalpincode.in/pincode/${pin}`);
+      const data = await res.json();
+      if (
+        Array.isArray(data) &&
+        data[0]?.Status === "Success" &&
+        Array.isArray(data[0]?.PostOffice) &&
+        data[0].PostOffice.length > 0
+      ) {
+        const offices = data[0].PostOffice;
+        setPostOfficesList(offices);
+        const first = offices[0];
+
+        const stateName = (first.State || "ODISHA").toUpperCase();
+        let districtName = (first.District || "BALASORE").toUpperCase();
+        if (districtName === "BALESWAR") districtName = "BALASORE";
+        const blockName = (first.Block && first.Block !== "NA" ? first.Block : "BASTA").toUpperCase();
+        const primaryPost = (first.Name || "").toUpperCase();
+
+        setFormData(prev => ({
+          ...prev,
+          state: stateName,
+          district: districtName,
+          block: blockName,
+          post: prev.post ? prev.post : primaryPost,
+          village: prev.village ? prev.village : primaryPost,
+        }));
+        setPincodeAutoFilled(true);
+      } else {
+        const match = LOCAL_PINCODES[pin];
+        if (match) {
+          setFormData(prev => ({
+            ...prev,
+            state: match.state,
+            district: match.district,
+            block: match.block,
+            post: prev.post ? prev.post : match.post,
+            village: prev.village ? prev.village : match.post,
+          }));
+          setPincodeAutoFilled(true);
+        } else {
+          setPincodeError("Location details not found online. Please fill Post, Block, and District.");
+        }
+      }
+    } catch (err) {
+      console.warn("Pincode API lookup error, using local fallback:", err);
+      const match = LOCAL_PINCODES[pin];
+      if (match) {
+        setFormData(prev => ({
+          ...prev,
+          state: match.state,
+          district: match.district,
+          block: match.block,
+          post: prev.post ? prev.post : match.post,
+          village: prev.village ? prev.village : match.post,
+        }));
+        setPincodeAutoFilled(true);
+      }
+    } finally {
+      setPincodeLoading(false);
+    }
+  };
+
+  // Numeric-only handler for Pincode (6 digits) with auto-trigger
+  const handlePincodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const numeric = e.target.value.replace(/\D/g, "").slice(0, 6);
+    setFormData(prev => ({ ...prev, pincode: numeric }));
+    if (numeric.length === 6) {
+      lookupPincode(numeric);
+    } else {
+      setPincodeAutoFilled(false);
+      setPostOfficesList([]);
+      setPincodeError("");
+    }
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -234,24 +383,24 @@ export default function ApplyAdmission() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <div className="min-h-screen bg-gray-50 py-4 sm:py-8 px-3 sm:px-4">
       <div className="max-w-2xl mx-auto">
-        <div className="card p-8">
-          <div className="mb-8">
-            <Link href="/" className="text-blue-600 hover:underline mb-4 inline-block">
-              ← Back
+        <div className="card p-4 sm:p-8">
+          <div className="mb-6 sm:mb-8">
+            <Link href="/" className="text-blue-600 hover:underline mb-2 sm:mb-4 inline-block text-xs sm:text-sm font-semibold">
+              ← Back to Home
             </Link>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
               Admission Application
             </h1>
-            <p className="text-gray-600">Session: {session.sessionName}</p>
+            <p className="text-xs sm:text-sm text-gray-600">Session: {session.sessionName}</p>
           </div>
 
-          <div className="flex gap-2 mb-8">
+          <div className="flex gap-1.5 sm:gap-2 mb-6 sm:mb-8">
             {[1, 2, 3, 4, 5, 6, 7].map((s) => (
               <div
                 key={s}
-                className={`flex-1 h-2 rounded-full ${
+                className={`flex-1 h-1.5 sm:h-2 rounded-full ${
                   s <= step ? "bg-blue-600" : "bg-gray-200"
                 }`}
               />
@@ -272,13 +421,18 @@ export default function ApplyAdmission() {
                     name="class"
                     value={formData.class}
                     onChange={handleInputChange}
-                    className="input"
+                    className="input font-semibold text-slate-800"
                     required
                   >
-                    <option value="">Select Class</option>
-                    {session.allowedClasses.map((c) => (
+                    <option value="">-- Select Class Applying For --</option>
+                    {Array.from(
+                      new Set([
+                        ...(session.allowedClasses && session.allowedClasses.length > 0 ? session.allowedClasses : []),
+                        ...STANDARD_CLASSES,
+                      ])
+                    ).map((c) => (
                       <option key={c} value={c}>
-                        Class {c}
+                        {["Nursery", "LKG", "UKG"].includes(c) || c.toLowerCase().startsWith("class") ? c : `Class ${c}`}
                       </option>
                     ))}
                   </select>
@@ -293,6 +447,7 @@ export default function ApplyAdmission() {
                     value={formData.previousSchool}
                     onChange={handleInputChange}
                     className="input"
+                    placeholder="Previous school name (if applicable)"
                   />
                 </div>
                 <button
@@ -324,7 +479,7 @@ export default function ApplyAdmission() {
                     required
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Gender *
@@ -356,7 +511,7 @@ export default function ApplyAdmission() {
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Blood Group
@@ -379,28 +534,46 @@ export default function ApplyAdmission() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Aadhaar Number
-                    </label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-sm font-medium text-gray-700">
+                        Aadhaar Number
+                      </label>
+                      <span className="text-[11px] text-slate-400 font-mono">
+                        {formData.aadhaar.length}/12 numeric
+                      </span>
+                    </div>
                     <input
-                      type="text"
+                      type="tel"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={12}
                       name="aadhaar"
+                      placeholder="12-digit numeric Aadhaar"
                       value={formData.aadhaar}
-                      onChange={handleInputChange}
-                      className="input"
+                      onChange={handleAadhaarChange}
+                      className="input font-mono tracking-wider"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Mobile Number *
-                  </label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-sm font-medium text-gray-700">
+                      Mobile Number *
+                    </label>
+                    <span className="text-[11px] text-slate-400 font-mono">
+                      {formData.mobile.length}/10 numeric
+                    </span>
+                  </div>
                   <input
                     type="tel"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={10}
                     name="mobile"
+                    placeholder="10-digit phone number"
                     value={formData.mobile}
-                    onChange={handleInputChange}
-                    className="input"
+                    onChange={handleMobileChange}
+                    className="input font-mono tracking-wider"
                     required
                   />
                 </div>
@@ -429,7 +602,7 @@ export default function ApplyAdmission() {
                 <h2 className="text-lg font-semibold text-gray-900">
                   Parent Details
                 </h2>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Father's Name *
@@ -457,7 +630,7 @@ export default function ApplyAdmission() {
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Guardian (if any)
@@ -471,15 +644,24 @@ export default function ApplyAdmission() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Parent's Mobile *
-                    </label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-sm font-medium text-gray-700">
+                        Parent's Mobile *
+                      </label>
+                      <span className="text-[11px] text-slate-400 font-mono">
+                        {formData.parentMobile.length}/10 numeric
+                      </span>
+                    </div>
                     <input
                       type="tel"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={10}
                       name="parentMobile"
+                      placeholder="10-digit mobile number"
                       value={formData.parentMobile}
-                      onChange={handleInputChange}
-                      className="input"
+                      onChange={handleParentMobileChange}
+                      className="input font-mono tracking-wider"
                       required
                     />
                   </div>
@@ -506,38 +688,107 @@ export default function ApplyAdmission() {
 
             {step === 4 && (
               <div className="space-y-4">
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Address Details
-                </h2>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Village *
-                    </label>
-                    <input
-                      type="text"
-                      name="village"
-                      value={formData.village}
-                      onChange={handleInputChange}
-                      className="input"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Post *
-                    </label>
-                    <input
-                      type="text"
-                      name="post"
-                      value={formData.post}
-                      onChange={handleInputChange}
-                      className="input"
-                      required
-                    />
-                  </div>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    Address Details
+                  </h2>
+                  <span className="text-xs text-blue-600 font-semibold flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5" /> Enter 6-digit Pincode to auto-fill address
+                  </span>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+
+                {/* 1. PINCODE (UPSIDE / FIRST) */}
+                <div className="p-4 bg-gradient-to-r from-blue-50/90 via-indigo-50/60 to-blue-50/90 border border-blue-200 rounded-2xl space-y-2">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <label className="block text-sm font-bold text-slate-900">
+                      Pincode * <span className="text-xs font-normal text-slate-500">(Numeric 6 digits)</span>
+                    </label>
+                    {pincodeLoading && (
+                      <span className="text-xs font-bold text-blue-600 flex items-center gap-1.5 animate-pulse">
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        Fetching location details...
+                      </span>
+                    )}
+                    {pincodeAutoFilled && !pincodeLoading && (
+                      <span className="text-xs font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-2xs">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        Location Auto-Filled
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="relative">
+                    <input
+                      type="tel"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={6}
+                      name="pincode"
+                      value={formData.pincode}
+                      onChange={handlePincodeChange}
+                      placeholder="e.g. 756029"
+                      className="input text-base font-mono font-bold tracking-widest text-slate-900 border-blue-300 focus:border-blue-500 bg-white"
+                      required
+                    />
+                    <span className="absolute right-3 top-2.5 text-xs font-bold text-slate-400 font-mono">
+                      {formData.pincode.length}/6 digits
+                    </span>
+                  </div>
+
+                  {pincodeError && (
+                    <div className="flex items-center gap-1.5 text-xs text-amber-700 bg-amber-50 p-2 rounded-xl border border-amber-200">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      <span>{pincodeError}</span>
+                    </div>
+                  )}
+
+                  {/* Postal Offices Quick Selection */}
+                  {postOfficesList.length > 0 && (
+                    <div className="pt-2 border-t border-blue-200/60">
+                      <span className="text-[11px] font-bold text-slate-600 block mb-1">
+                        Post Offices in Pincode {formData.pincode} (click to set Post / Village):
+                      </span>
+                      <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
+                        {postOfficesList.map((po, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => {
+                              setFormData(prev => ({
+                                ...prev,
+                                post: po.Name.toUpperCase(),
+                                village: prev.village || po.Name.toUpperCase()
+                              }));
+                            }}
+                            className={`text-[11px] px-2.5 py-1 rounded-lg border font-semibold transition ${
+                              formData.post === po.Name.toUpperCase()
+                                ? "bg-blue-600 text-white border-blue-600 shadow-2xs"
+                                : "bg-white text-slate-700 border-slate-200 hover:border-blue-300 hover:bg-white"
+                            }`}
+                          >
+                            {po.Name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* 2. STATE & DISTRICT */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      State *
+                    </label>
+                    <input
+                      type="text"
+                      name="state"
+                      value={formData.state}
+                      onChange={handleInputChange}
+                      className="input uppercase font-semibold"
+                      required
+                    />
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       District *
@@ -546,10 +797,12 @@ export default function ApplyAdmission() {
                       name="district"
                       value={showDistrictOther ? "Other" : formData.district}
                       onChange={handleInputChange}
-                      className="input"
+                      className="input font-semibold"
                       required
                     >
-                      {ODISHA_DISTRICTS.map((district) => (
+                      {Array.from(
+                        new Set([...ODISHA_DISTRICTS, formData.district].filter(Boolean))
+                      ).map((district) => (
                         <option key={district} value={district}>
                           {district}
                         </option>
@@ -562,11 +815,15 @@ export default function ApplyAdmission() {
                         value={formData.district}
                         onChange={handleInputChange}
                         placeholder="Enter district name"
-                        className="input mt-2"
+                        className="input mt-2 uppercase font-semibold"
                         required
                       />
                     )}
                   </div>
+                </div>
+
+                {/* 3. BLOCK & POST */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Block *
@@ -575,10 +832,12 @@ export default function ApplyAdmission() {
                       name="block"
                       value={showBlockOther ? "Other" : formData.block}
                       onChange={handleInputChange}
-                      className="input"
+                      className="input font-semibold"
                       required
                     >
-                      {BALASORE_BLOCKS.map((block) => (
+                      {Array.from(
+                        new Set([...BALASORE_BLOCKS, formData.block].filter(Boolean))
+                      ).map((block) => (
                         <option key={block} value={block}>
                           {block}
                         </option>
@@ -591,40 +850,43 @@ export default function ApplyAdmission() {
                         value={formData.block}
                         onChange={handleInputChange}
                         placeholder="Enter block name"
-                        className="input mt-2"
+                        className="input mt-2 uppercase font-semibold"
                         required
                       />
                     )}
                   </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      State *
+                      Post *
                     </label>
                     <input
                       type="text"
-                      name="state"
-                      value={formData.state}
+                      name="post"
+                      placeholder="e.g. BASTA"
+                      value={formData.post}
                       onChange={handleInputChange}
-                      className="input"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Pincode *
-                    </label>
-                    <input
-                      type="text"
-                      name="pincode"
-                      value={formData.pincode}
-                      onChange={handleInputChange}
-                      className="input"
+                      className="input uppercase font-semibold"
                       required
                     />
                   </div>
                 </div>
+
+                {/* 4. VILLAGE */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Village / Locality / Street Address *
+                  </label>
+                  <input
+                    type="text"
+                    name="village"
+                    placeholder="Enter village or residential address"
+                    value={formData.village}
+                    onChange={handleInputChange}
+                    className="input uppercase font-semibold"
+                    required
+                  />
+                </div>
+
                 <div className="flex gap-4">
                   <button
                     type="button"
@@ -725,7 +987,7 @@ export default function ApplyAdmission() {
                 <p className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg border border-blue-100">
                   For receiving government benefits, scholarship money, bicycle scheme, etc.
                 </p>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Account Holder Name
@@ -743,11 +1005,19 @@ export default function ApplyAdmission() {
                       Account Number
                     </label>
                     <input
-                      type="text"
+                      type="tel"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       name="accountNumber"
+                      placeholder="Account number (numeric only)"
                       value={formData.accountNumber}
-                      onChange={handleInputChange}
-                      className="input"
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          accountNumber: e.target.value.replace(/\D/g, "")
+                        }))
+                      }
+                      className="input font-mono"
                     />
                   </div>
                   <div>
@@ -757,9 +1027,15 @@ export default function ApplyAdmission() {
                     <input
                       type="text"
                       name="ifscCode"
+                      placeholder="e.g. SBIN0001234"
                       value={formData.ifscCode}
-                      onChange={handleInputChange}
-                      className="input"
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          ifscCode: e.target.value.toUpperCase()
+                        }))
+                      }
+                      className="input uppercase font-mono"
                     />
                   </div>
                   <div>

@@ -22,7 +22,7 @@ const studentSchema = new mongoose.Schema({
     sessionName: String,
     class: {
       type: String,
-      enum: ['8', '9', '10']
+      required: true
     },
     section: String,
     rollNo: Number

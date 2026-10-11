@@ -10,9 +10,9 @@ export const DashboardLayout = ({
 }) => {
   return (
     <ProtectedRoute>
-      <div className="flex min-h-screen">
+      <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
         <Sidebar />
-        <main className="flex-1 md:ml-64 p-4 md:p-8">{children}</main>
+        <main className="flex-1 w-full md:ml-64 p-3.5 sm:p-5 md:p-8 min-w-0 overflow-x-hidden">{children}</main>
       </div>
     </ProtectedRoute>
   );

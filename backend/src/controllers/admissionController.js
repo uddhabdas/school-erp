@@ -1,32 +1,43 @@
 const AdmissionApplication = require('../models/AdmissionApplication');
 const AcademicSession = require('../models/AcademicSession');
 const Student = require('../models/Student');
+const Counter = require('../models/Counter');
+const { escapeRegex } = require('../utils/sanitize');
 const cloudinary = require('../utils/cloudinary');
 const logAction = require('../utils/auditLogger');
 const bcrypt = require('bcryptjs');
 
 const generateApplicationId = async () => {
   const year = new Date().getFullYear();
-  const count = await AdmissionApplication.countDocuments({ 
-    createdAt: { $gte: new Date(year, 0, 1) } 
-  });
-  return `APP-${year}-${String(count + 1).padStart(4, '0')}`;
+  let seq = await Counter.getNextSequence(`app_${year}`);
+  let appId = `APP-${year}-${String(seq).padStart(4, '0')}`;
+  while (await AdmissionApplication.exists({ applicationId: appId })) {
+    seq = await Counter.getNextSequence(`app_${year}`);
+    appId = `APP-${year}-${String(seq).padStart(4, '0')}`;
+  }
+  return appId;
 };
 
 const generateStudentId = async () => {
   const year = new Date().getFullYear();
-  const count = await Student.countDocuments({ 
-    createdAt: { $gte: new Date(year, 0, 1) } 
-  });
-  return `STU-${year}-${String(count + 1).padStart(4, '0')}`;
+  let seq = await Counter.getNextSequence(`stu_${year}`);
+  let stuId = `STU-${year}-${String(seq).padStart(4, '0')}`;
+  while (await Student.exists({ studentId: stuId })) {
+    seq = await Counter.getNextSequence(`stu_${year}`);
+    stuId = `STU-${year}-${String(seq).padStart(4, '0')}`;
+  }
+  return stuId;
 };
 
 const generateAdmissionNo = async () => {
   const year = new Date().getFullYear();
-  const count = await Student.countDocuments({ 
-    createdAt: { $gte: new Date(year, 0, 1) } 
-  });
-  return `ADM-${year}-${String(count + 1).padStart(4, '0')}`;
+  let seq = await Counter.getNextSequence(`adm_${year}`);
+  let admNo = `ADM-${year}-${String(seq).padStart(4, '0')}`;
+  while (await Student.exists({ admissionNo: admNo })) {
+    seq = await Counter.getNextSequence(`adm_${year}`);
+    admNo = `ADM-${year}-${String(seq).padStart(4, '0')}`;
+  }
+  return admNo;
 };
 
 const uploadToCloudinary = async (fileBuffer, mimetype = 'image/jpeg') => {
@@ -110,8 +121,8 @@ const createApplication = async (req, res) => {
 
     res.status(201).json(application);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('createApplication error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
@@ -126,13 +137,14 @@ const getApplications = async (req, res) => {
       query['academic.class'] = classFilter;
     }
     if (search && search.trim() !== '') {
-      const term = search.trim();
+      const escaped = escapeRegex(search.trim());
+      const regex = { $regex: escaped, $options: 'i' };
       query.$or = [
-        { applicationId: { $regex: term, $options: 'i' } },
-        { 'student.name': { $regex: term, $options: 'i' } },
-        { 'student.mobile': { $regex: term, $options: 'i' } },
-        { 'parents.fatherName': { $regex: term, $options: 'i' } },
-        { 'student.aadhaar': { $regex: term, $options: 'i' } }
+        { applicationId: regex },
+        { 'student.name': regex },
+        { 'student.mobile': regex },
+        { 'parents.fatherName': regex },
+        { 'student.aadhaar': regex }
       ];
     }
     const applications = await AdmissionApplication.find(query).sort({ createdAt: -1 });
@@ -278,11 +290,110 @@ const rejectApplication = async (req, res) => {
   }
 };
 
+const trackPublicApplication = async (req, res) => {
+  try {
+    const { applicationNo, dob } = req.query;
+    if (!applicationNo) {
+      return res.status(400).json({ message: 'Application registration number is required' });
+    }
+
+    const cleanAppNo = String(applicationNo).trim();
+    const app = await AdmissionApplication.findOne({
+      applicationId: { $regex: new RegExp(`^${escapeRegex(cleanAppNo)}$`, 'i') }
+    });
+
+    if (!app) {
+      return res.status(404).json({ message: 'No admission application found with this registration number' });
+    }
+
+    // If DOB provided, verify match
+    if (dob && app.personal?.dob) {
+      const inputDate = new Date(dob);
+      const appDate = new Date(app.personal.dob);
+      if (!isNaN(inputDate.getTime()) && !isNaN(appDate.getTime())) {
+        const d1 = `${inputDate.getUTCFullYear()}-${inputDate.getUTCMonth()}-${inputDate.getUTCDate()}`;
+        const d2 = `${appDate.getUTCFullYear()}-${appDate.getUTCMonth()}-${appDate.getUTCDate()}`;
+        const ld1 = `${inputDate.getFullYear()}-${inputDate.getMonth()}-${inputDate.getDate()}`;
+        const ld2 = `${appDate.getFullYear()}-${appDate.getMonth()}-${appDate.getDate()}`;
+        if (d1 !== d2 && ld1 !== ld2) {
+          return res.status(400).json({ message: 'Date of birth does not match the registered application record' });
+        }
+      }
+    }
+
+    res.json({
+      success: true,
+      application: {
+        applicationId: app.applicationId,
+        studentName: app.personal?.name,
+        gender: app.personal?.gender,
+        dob: app.personal?.dob,
+        fatherName: app.parents?.fatherName,
+        motherName: app.parents?.motherName,
+        mobile: app.parents?.parentMobile || app.personal?.mobile,
+        applyingForClass: app.academic?.class,
+        sessionName: app.academic?.sessionName,
+        status: app.status,
+        submissionDate: app.createdAt,
+        verifiedAt: app.verifiedAt,
+        rejectionReason: app.rejectionReason,
+        documentsSubmitted: {
+          photo: Boolean(app.documents?.photo),
+          aadhaar: Boolean(app.documents?.aadhaar),
+          birthCertificate: Boolean(app.documents?.birthCertificate),
+          transferCertificate: Boolean(app.documents?.transferCertificate)
+        }
+      }
+    });
+  } catch (error) {
+    console.error('trackPublicApplication error:', error);
+    res.status(500).json({ message: 'Error checking application status', error: error.message });
+  }
+};
+
+const getPublicApplicationSlip = async (req, res) => {
+  try {
+    const { applicationNo } = req.params;
+    const cleanAppNo = String(applicationNo).trim();
+
+    const app = await AdmissionApplication.findOne({
+      applicationId: { $regex: new RegExp(`^${escapeRegex(cleanAppNo)}$`, 'i') }
+    });
+
+    if (!app) {
+      return res.status(404).json({ message: 'Application record not found' });
+    }
+
+    const SchoolSetting = require('../models/SchoolSetting');
+    const schoolSetting = await SchoolSetting.findOne() || {
+      schoolName: 'DULICHAND SONADEVI HIGH SCHOOL',
+      address: 'Ranamunduli, Basta, Balasore, Odisha - 756029'
+    };
+
+    res.json({
+      success: true,
+      school: {
+        name: schoolSetting.schoolName || 'DULICHAND SONADEVI HIGH SCHOOL',
+        address: schoolSetting.address || 'Ranamunduli, Basta, Balasore, Odisha - 756029',
+        tagline: '5T High School Transformation Initiative | Govt. of Odisha Recognized',
+        schoolCode: '0408102',
+        udiseCode: '21080314502'
+      },
+      application: app
+    });
+  } catch (error) {
+    console.error('getPublicApplicationSlip error:', error);
+    res.status(500).json({ message: 'Error generating application acknowledgment slip', error: error.message });
+  }
+};
+
 module.exports = {
   createApplication,
   getApplications,
   getApplicationById,
   updateApplication,
   approveApplication,
-  rejectApplication
+  rejectApplication,
+  trackPublicApplication,
+  getPublicApplicationSlip
 };

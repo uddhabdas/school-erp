@@ -711,7 +711,7 @@ export default function AuditLogsPage() {
         ) : (
           <div className="card overflow-hidden shadow-sm border border-slate-200/80 bg-white">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
+              <table className="w-full text-left text-sm min-w-[750px]">
                 <thead className="bg-slate-50/80 border-b border-slate-200">
                   <tr>
                     <th className="px-5 py-3.5 text-xs font-bold text-slate-600 uppercase tracking-wider">

@@ -5,12 +5,18 @@ const {
   getApplicationById,
   updateApplication,
   approveApplication,
-  rejectApplication
+  rejectApplication,
+  trackPublicApplication,
+  getPublicApplicationSlip
 } = require('../controllers/admissionController');
 const { protect, authorize } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 
 const router = express.Router();
+
+// Public routes for parents/applicants
+router.get('/public/track', trackPublicApplication);
+router.get('/public/slip/:applicationNo', getPublicApplicationSlip);
 
 router.post('/', upload.fields([
   { name: 'photo', maxCount: 1 },

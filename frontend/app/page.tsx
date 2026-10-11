@@ -47,19 +47,19 @@ export default function Home() {
       {/* Navigation */}
       <nav className="bg-white/90 backdrop-blur-xl sticky top-0 z-50 border-b border-slate-100 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
-          <div className="flex justify-between items-center">
-            <Link href="/" className="flex items-center gap-4">
-              <img src="/image1.png" alt="School" className="h-16 w-16 rounded-2xl object-cover border-4 border-white shadow-xl" />
-              <div className="flex flex-col gap-0.5">
-                <div className="flex items-center gap-2">
-                  <h1 className="text-2xl font-extrabold bg-gradient-to-r from-slate-800 to-slate-700 bg-clip-text text-transparent">
-                    Dulichand Sonadevi High School
+          <div className="flex justify-between items-center gap-2">
+            <Link href="/" className="flex items-center gap-2.5 sm:gap-4 min-w-0">
+              <img src="/image1.png" alt="School" className="h-11 w-11 sm:h-16 sm:w-16 rounded-xl sm:rounded-2xl object-cover border-2 sm:border-4 border-white shadow-md sm:shadow-xl shrink-0" />
+              <div className="flex flex-col gap-0.5 min-w-0">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <h1 className="text-sm sm:text-2xl font-black bg-gradient-to-r from-slate-800 to-slate-700 bg-clip-text text-transparent truncate max-w-[190px] sm:max-w-none">
+                    Dulichand Sonadevi
                   </h1>
-                  <span className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-sm font-bold rounded-full ml-2 shadow-md">
+                  <span className="inline-flex items-center px-2 py-0.5 sm:px-3 sm:py-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[10px] sm:text-sm font-bold rounded-full shadow-xs shrink-0">
                     5T School
                   </span>
                 </div>
-                <p className="text-slate-600 text-base">
+                <p className="text-slate-600 text-xs sm:text-base truncate">
                   Ranamunduli, Basta, Balasore
                 </p>
               </div>
@@ -69,6 +69,9 @@ export default function Home() {
             <div className="hidden md:flex items-center gap-4">
               <Link href="#features" className="text-slate-700 hover:text-blue-700 font-semibold transition">Features</Link>
               <Link href="#about" className="text-slate-700 hover:text-blue-700 font-semibold transition">About Us</Link>
+              <Link href="/track-admission" className="px-4 py-2 border border-slate-300 text-slate-700 rounded-full font-semibold hover:bg-slate-50 transition text-sm">
+                Track Application
+              </Link>
               <Link href="/admissions/apply" className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full font-semibold shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5">
                 Apply Now
               </Link>
@@ -79,22 +82,26 @@ export default function Home() {
 
             {/* Mobile Menu Toggle */}
             <button
-              className="md:hidden p-2 rounded-lg hover:bg-slate-100"
+              className="md:hidden p-2 rounded-xl hover:bg-slate-100 text-slate-700 shrink-0"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label="Toggle navigation menu"
             >
-              {isMenuOpen ? <X className="w-6 h-6 text-slate-700" /> : <Menu className="w-6 h-6 text-slate-700" />}
+              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
 
           {/* Mobile Menu */}
           {isMenuOpen && (
-            <div className="mt-4 flex flex-col gap-3 py-4 border-t border-slate-100 md:hidden">
-              <Link href="#features" onClick={() => setIsMenuOpen(false)} className="text-slate-700 font-semibold py-1.5">Features</Link>
-              <Link href="#about" onClick={() => setIsMenuOpen(false)} className="text-slate-700 font-semibold py-1.5">About Us</Link>
-              <Link href="/admissions/apply" onClick={() => setIsMenuOpen(false)} className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full font-semibold text-center">
+            <div className="mt-4 flex flex-col gap-2.5 py-4 border-t border-slate-100 md:hidden animate-in fade-in">
+              <Link href="#features" onClick={() => setIsMenuOpen(false)} className="text-slate-700 font-bold py-2 px-3 rounded-xl hover:bg-slate-50">Features</Link>
+              <Link href="#about" onClick={() => setIsMenuOpen(false)} className="text-slate-700 font-bold py-2 px-3 rounded-xl hover:bg-slate-50">About Us</Link>
+              <Link href="/track-admission" onClick={() => setIsMenuOpen(false)} className="px-5 py-2.5 text-slate-700 font-bold text-center border border-slate-200 rounded-xl bg-white shadow-xs">
+                Track Application
+              </Link>
+              <Link href="/admissions/apply" onClick={() => setIsMenuOpen(false)} className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold text-center shadow-md">
                 Apply Now
               </Link>
-              <Link href="/login" onClick={() => setIsMenuOpen(false)} className="px-5 py-2.5 bg-slate-100 text-slate-800 rounded-full font-semibold text-center">
+              <Link href="/login" onClick={() => setIsMenuOpen(false)} className="px-5 py-2.5 bg-slate-100 text-slate-800 rounded-xl font-bold text-center hover:bg-slate-200">
                 Login
               </Link>
             </div>
@@ -103,28 +110,28 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-16 sm:py-24 px-4 sm:px-6 lg:px-8">
+      <section className="relative overflow-hidden py-10 sm:py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
-              <div className="inline-flex items-center gap-3 bg-gradient-to-r from-emerald-100 to-teal-100 px-5 py-2 rounded-full border border-emerald-200 shadow-md">
-                <img src="/5tlogo.png" alt="5T Logo" className="w-10 h-10 rounded-full" />
-                <span className="text-emerald-800 font-bold text-base">Admission Open 2026-27</span>
+          <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 items-center">
+            <div className="space-y-6 sm:space-y-8">
+              <div className="inline-flex items-center gap-2.5 bg-gradient-to-r from-emerald-100 to-teal-100 px-4 py-1.5 sm:px-5 sm:py-2 rounded-full border border-emerald-200 shadow-sm">
+                <img src="/5tlogo.png" alt="5T Logo" className="w-7 h-7 sm:w-10 sm:h-10 rounded-full" />
+                <span className="text-emerald-800 font-bold text-xs sm:text-base">Admission Open 2026-27</span>
               </div>
-              <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold leading-tight text-slate-900">
+              <h1 className="text-3xl sm:text-5xl lg:text-7xl font-extrabold leading-tight text-slate-900">
                 Building Future
                 <span className="block bg-gradient-to-r from-emerald-700 to-teal-700 bg-clip-text text-transparent">
                   Leaders
                 </span>
               </h1>
-              <p className="text-xl text-slate-700 max-w-2xl">
+              <p className="text-base sm:text-xl text-slate-700 max-w-2xl leading-relaxed">
                 Empowering young minds through quality education, character building, and holistic development for a bright tomorrow.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/admissions/apply" className="flex items-center justify-center gap-2 px-10 py-4.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xl font-bold rounded-full shadow-xl shadow-emerald-300 hover:shadow-emerald-400 transition-all duration-300 transform hover:-translate-y-1">
-                  Apply for Admission <ChevronRight className="w-6 h-6" />
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <Link href="/admissions/apply" className="flex items-center justify-center gap-2 px-6 sm:px-10 py-3.5 sm:py-4.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-base sm:text-xl font-bold rounded-2xl sm:rounded-full shadow-lg shadow-emerald-300 hover:shadow-emerald-400 transition-all duration-300 transform hover:-translate-y-1">
+                  Apply for Admission <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
                 </Link>
-                <Link href="#about" className="flex items-center justify-center gap-2 px-8 py-4 border-2 border-slate-300 text-slate-800 text-lg font-semibold rounded-full hover:bg-slate-50 transition-all duration-300">
+                <Link href="#about" className="flex items-center justify-center gap-2 px-6 sm:px-8 py-3.5 sm:py-4 border-2 border-slate-300 text-slate-800 text-base sm:text-lg font-semibold rounded-2xl sm:rounded-full hover:bg-slate-50 transition-all duration-300">
                   Learn More
                 </Link>
               </div>
@@ -132,7 +139,7 @@ export default function Home() {
 
             {/* School Image */}
             <div className="relative">
-              <div className="relative overflow-hidden rounded-3xl shadow-2xl border-4 border-white">
+              <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl border-2 sm:border-4 border-white">
                 <img src="/image1.png" alt="School Building" className="w-full h-auto object-cover" />
               </div>
               <img src="/image2.png" alt="School Campus" className="absolute -bottom-6 -right-6 w-40 h-40 object-cover rounded-2xl border-4 border-white shadow-xl hidden sm:block" />
@@ -142,31 +149,31 @@ export default function Home() {
       </section>
 
       {/* Stats */}
-      <section className="py-16 bg-white">
+      <section className="py-10 sm:py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="text-center p-6 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-100">
-              <p className="text-4xl font-bold text-blue-700">VIII-X</p>
-              <p className="text-slate-700 font-semibold">Classes</p>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-8">
+            <div className="text-center p-4 sm:p-6 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-100">
+              <p className="text-2xl sm:text-4xl font-bold text-blue-700">VIII-X</p>
+              <p className="text-slate-700 font-semibold text-xs sm:text-base">Classes</p>
             </div>
-            <div className="text-center p-6 rounded-2xl bg-gradient-to-br from-green-50 to-green-100 border border-green-100">
-              <p className="text-4xl font-bold text-green-700">200+</p>
-              <p className="text-slate-700 font-semibold">Students</p>
+            <div className="text-center p-4 sm:p-6 rounded-2xl bg-gradient-to-br from-green-50 to-green-100 border border-green-100">
+              <p className="text-2xl sm:text-4xl font-bold text-green-700">200+</p>
+              <p className="text-slate-700 font-semibold text-xs sm:text-base">Students</p>
             </div>
-            <div className="text-center p-6 rounded-2xl bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-100">
-              <p className="text-4xl font-bold text-yellow-700">20+</p>
-              <p className="text-slate-700 font-semibold">Teachers</p>
+            <div className="text-center p-4 sm:p-6 rounded-2xl bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-100">
+              <p className="text-2xl sm:text-4xl font-bold text-yellow-700">20+</p>
+              <p className="text-slate-700 font-semibold text-xs sm:text-base">Teachers</p>
             </div>
-            <div className="text-center p-6 rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-100">
-              <p className="text-4xl font-bold text-purple-700">5T</p>
-              <p className="text-slate-700 font-semibold">Certified</p>
+            <div className="text-center p-4 sm:p-6 rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-100">
+              <p className="text-2xl sm:text-4xl font-bold text-purple-700">5T</p>
+              <p className="text-slate-700 font-semibold text-xs sm:text-base">Certified</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Features */}
-      <section id="features" className="py-16 sm:py-24">
+      <section id="features" className="py-12 sm:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-4">

@@ -8,14 +8,35 @@ const SchoolSetting = require('../models/SchoolSetting');
 const logAction = require('../utils/auditLogger');
 const mongoose = require('mongoose');
 
+const FeePayment = require('../models/FeePayment');
+
 const getDashboardStats = async (req, res) => {
   try {
-    const totalStudents = await Student.countDocuments({ status: 'active' });
-    const totalFaculty = await User.countDocuments({ role: { $in: ['faculty', 'admin', 'super_admin'] }, status: 'active' });
-    const pendingVerifications = await AdmissionApplication.countDocuments({ status: 'submitted' });
-    const approvedAdmissions = await AdmissionApplication.countDocuments({ status: 'approved' });
-    const activeSession = await AcademicSession.findOne({ status: 'active' });
-    const passedOut = await Student.countDocuments({ status: 'passed_out' });
+    const isFaculty = req.user?.role === 'faculty';
+
+    const [
+      totalStudents,
+      totalFaculty,
+      pendingVerifications,
+      approvedAdmissions,
+      activeSession,
+      passedOut,
+      feePaymentsAgg
+    ] = await Promise.all([
+      Student.countDocuments({ status: 'active' }),
+      User.countDocuments({ role: { $in: ['faculty', 'admin', 'super_admin'] }, status: 'active' }),
+      AdmissionApplication.countDocuments({ status: 'submitted' }),
+      AdmissionApplication.countDocuments({ status: 'approved' }),
+      AcademicSession.findOne({ status: 'active' }),
+      Student.countDocuments({ status: 'passed_out' }),
+      !isFaculty
+        ? FeePayment.aggregate([
+            { $group: { _id: null, totalCollected: { $sum: '$paidAmount' }, count: { $sum: 1 } } }
+          ])
+        : Promise.resolve([])
+    ]);
+
+    const totalFeesCollected = !isFaculty ? (feePaymentsAgg[0]?.totalCollected || 0) : undefined;
 
     res.json({
       totalStudents,
@@ -23,9 +44,11 @@ const getDashboardStats = async (req, res) => {
       pendingVerifications,
       approvedAdmissions,
       activeSession,
-      passedOut
+      passedOut,
+      ...(totalFeesCollected !== undefined ? { totalFeesCollected } : {})
     });
   } catch (error) {
+    console.error('Error in getDashboardStats:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

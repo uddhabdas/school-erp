@@ -3,31 +3,174 @@
 @tailwind utilities;
 
 @layer base {
+  html,
   body {
-    @apply bg-slate-50;
+    @apply bg-slate-50 text-slate-900;
+    max-width: 100vw;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Prevent iOS Safari auto-zoom on input focus by ensuring at least 16px on mobile */
+  @media (max-width: 640px) {
+    input,
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
   }
 }
 
 @layer components {
   .btn {
-    @apply px-5 py-2.5 rounded-2xl font-semibold transition-all duration-300 text-base;
+    @apply px-4 sm:px-5 py-2 sm:py-2.5 rounded-2xl font-semibold transition-all duration-300 text-sm sm:text-base inline-flex items-center justify-center;
   }
   .btn-primary {
-    @apply bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-700 hover:to-teal-700 shadow-lg hover:shadow-xl;
+    @apply bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-700 hover:to-teal-700 shadow-md sm:shadow-lg hover:shadow-xl active:scale-[0.98];
   }
   .btn-secondary {
-    @apply bg-slate-100 text-slate-800 hover:bg-slate-200;
+    @apply bg-slate-100 text-slate-800 hover:bg-slate-200 active:scale-[0.98];
   }
   .btn-danger {
-    @apply bg-gradient-to-r from-red-500 to-rose-600 text-white hover:from-red-600 hover:to-rose-700;
+    @apply bg-gradient-to-r from-red-500 to-rose-600 text-white hover:from-red-600 hover:to-rose-700 active:scale-[0.98];
   }
   .btn-success {
-    @apply bg-gradient-to-r from-green-600 to-emerald-700 text-white hover:from-green-700 hover:to-emerald-800;
+    @apply bg-gradient-to-r from-green-600 to-emerald-700 text-white hover:from-green-700 hover:to-emerald-800 active:scale-[0.98];
   }
   .input {
-    @apply w-full px-4 py-3 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white transition-all;
+    @apply w-full px-3.5 sm:px-4 py-2.5 sm:py-3 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white transition-all text-sm sm:text-base;
   }
   .card {
-    @apply bg-white rounded-2xl shadow-md border border-slate-100 hover:shadow-xl transition-all duration-300;
+    @apply bg-white rounded-2xl shadow-sm sm:shadow-md border border-slate-100 hover:shadow-lg transition-all duration-300;
+  }
+
+  /* Responsive Horizontal Scroll Container for Tables on Mobile */
+  .touch-scroll-container {
+    @apply overflow-x-auto w-full max-w-full;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  /* Mobile Sheet Modal Helper */
+  .mobile-modal-dialog {
+    @apply max-h-[92vh] sm:max-h-[85vh] flex flex-col w-full overflow-hidden;
+  }
+}
+
+/* Universal Guaranteed 1-Page A4 Print Stylesheet */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 4mm 6mm;
+  }
+
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide global background UI elements during printing */
+  nav,
+  header,
+  footer,
+  aside,
+  button,
+  .portal-dashboard-content,
+  .exams-dashboard-content,
+  .print-hidden,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Reset modal backdrop so it doesn't tint, clip, or position-fix during print */
+  #report-card-modal-backdrop {
+    position: static !important;
+    inset: auto !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    width: 100% !important;
+    display: block !important;
+    z-index: auto !important;
+  }
+
+  /* Reset modal dialog container */
+  #report-card-modal-dialog {
+    position: static !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    max-height: none !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    display: block !important;
+  }
+
+  /* 1-Page Marksheet container */
+  #printable-report-card {
+    display: block !important;
+    position: static !important;
+    margin: 0 auto !important;
+    padding: 6px 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 285mm !important;
+    box-sizing: border-box !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: 2px solid #0f172a !important;
+    border-radius: 6px !important;
+    page-break-after: avoid !important;
+    page-break-inside: avoid !important;
+    break-after: avoid !important;
+    break-inside: avoid !important;
+    page-break-before: avoid !important;
+    break-before: avoid !important;
+  }
+
+  /* 1-Page Money Receipt container */
+  #printable-receipt-root {
+    display: block !important;
+    position: static !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 282mm !important;
+    box-sizing: border-box !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    page-break-after: avoid !important;
+    page-break-inside: avoid !important;
+    break-after: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Ensure visibility of target components */
+  body * {
+    visibility: hidden;
+  }
+
+  #printable-report-card,
+  #printable-report-card *,
+  #printable-receipt-root,
+  #printable-receipt-root * {
+    visibility: visible;
   }
 }

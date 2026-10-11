@@ -17,18 +17,8 @@ const protect = async (req, res, next) => {
         user = await User.findOne({ email: decoded.email }).select('-password');
       }
       
-      // Resilient fallback: If database restarted with new IDs, but JWT was signed by server
-      if (!user) {
-        if (decoded.role) {
-          user = await User.findOne({ role: decoded.role, status: 'active' }).select('-password');
-        }
-        if (!user) {
-          user = await User.findOne({ status: 'active' }).select('-password');
-        }
-      }
-      
       if (!user || user.status !== 'active') {
-        return res.status(401).json({ message: 'Not authorized' });
+        return res.status(401).json({ message: 'User not found or account is inactive' });
       }
 
       req.user = user;

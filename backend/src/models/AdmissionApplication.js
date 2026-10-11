@@ -19,7 +19,7 @@ const admissionApplicationSchema = new mongoose.Schema({
     sessionName: String,
     class: {
       type: String,
-      enum: ['8', '9', '10']
+      required: true
     },
     previousSchool: String
   },

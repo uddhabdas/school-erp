@@ -43,22 +43,22 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-blue-50 flex items-center justify-center p-4">
-      <div className="bg-white p-8 w-full max-w-md rounded-3xl shadow-2xl border border-slate-100">
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <img src="/5tlogo.png" alt="5T Logo" className="h-20 w-20 rounded-full border-4 border-white shadow-xl" />
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-blue-50 flex items-center justify-center p-3 sm:p-4 py-8">
+      <div className="bg-white p-5 sm:p-8 w-full max-w-md rounded-3xl shadow-2xl border border-slate-100">
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="flex justify-center mb-3 sm:mb-4">
+            <img src="/5tlogo.png" alt="5T Logo" className="h-16 w-16 sm:h-20 sm:w-20 rounded-full border-4 border-white shadow-xl" />
           </div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-900 to-indigo-800 bg-clip-text text-transparent">School ERP</h1>
-          <p className="text-slate-600">Dulichand Sonadevi High School</p>
+          <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-900 to-indigo-800 bg-clip-text text-transparent">School ERP</h1>
+          <p className="text-xs sm:text-sm text-slate-600">Dulichand Sonadevi High School</p>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6 bg-slate-100 p-1 rounded-2xl">
+        <div className="flex gap-1.5 sm:gap-2 mb-5 sm:mb-6 bg-slate-100 p-1 rounded-2xl">
           {[
-            { id: "admin", label: "Staff Login" },
-            { id: "student", label: "Student Login" },
-            { id: "parent", label: "Parent Login" }
+            { id: "admin", shortLabel: "Staff", label: "Staff Login" },
+            { id: "student", shortLabel: "Student", label: "Student Login" },
+            { id: "parent", shortLabel: "Parent", label: "Parent Login" }
           ].map((tab) => (
             <button
               key={tab.id}
@@ -66,36 +66,83 @@ export default function Login() {
                 setActiveTab(tab.id as LoginType);
                 setError("");
               }}
-              className={`flex-1 py-2.5 px-4 rounded-xl font-semibold capitalize transition-all ${
+              className={`flex-1 py-2 sm:py-2.5 px-1.5 sm:px-4 rounded-xl font-bold text-xs sm:text-sm capitalize transition-all ${
                 activeTab === tab.id
                   ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md"
                   : "text-slate-700 hover:text-slate-900"
               }`}
             >
-              {tab.label}
+              <span className="sm:hidden">{tab.shortLabel}</span>
+              <span className="hidden sm:inline">{tab.label}</span>
             </button>
           ))}
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="bg-red-100 text-red-700 px-4 py-3 rounded-xl border border-red-200">
+            <div className="bg-red-100 text-red-700 px-4 py-3 rounded-xl border border-red-200 text-xs sm:text-sm">
               {error}
             </div>
           )}
 
           {activeTab === "admin" && (
             <>
+              {/* Demo Credentials Helper for Staff / Faculty */}
+              <div className="p-3 sm:p-3.5 bg-blue-50/80 rounded-2xl border border-blue-100/80 text-xs text-blue-900 space-y-2">
+                <div className="font-bold flex flex-wrap items-center justify-between gap-1 text-blue-800">
+                  <span className="flex items-center gap-1.5 text-[11px] sm:text-xs">
+                    <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                    Staff Demo Credentials
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIdentifier("anshuman@school.com");
+                        setPassword("password123");
+                        setError("");
+                      }}
+                      className="text-emerald-700 hover:text-emerald-900 bg-white px-2 py-0.5 rounded-lg border border-emerald-200 font-bold transition-all hover:bg-emerald-50"
+                    >
+                      Fill Faculty
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIdentifier("admin@school.com");
+                        setPassword("admin123");
+                        setError("");
+                      }}
+                      className="text-blue-700 hover:text-blue-900 bg-white px-2 py-0.5 rounded-lg border border-blue-200 font-bold transition-all hover:bg-blue-50"
+                    >
+                      Fill Admin
+                    </button>
+                  </div>
+                </div>
+                <div className="text-[11px] text-blue-700/90 leading-relaxed grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-0.5">
+                  <div className="p-1.5 bg-white/70 rounded-lg border border-blue-100">
+                    <span className="font-bold text-slate-800">Faculty:</span> <span className="font-mono text-slate-700">anshuman@school.com</span>
+                    <br />
+                    <span className="text-slate-500">Pass:</span> <span className="font-mono text-slate-700">password123</span>
+                  </div>
+                  <div className="p-1.5 bg-white/70 rounded-lg border border-blue-100">
+                    <span className="font-bold text-slate-800">Admin:</span> <span className="font-mono text-slate-700">admin@school.com</span>
+                    <br />
+                    <span className="text-slate-500">Pass:</span> <span className="font-mono text-slate-700">admin123</span>
+                  </div>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                  Email / Mobile
+                  Email / Mobile / Employee ID
                 </label>
                 <input
                   type="text"
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
-                  className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-all"
-                  placeholder="Enter email or mobile"
+                  className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-all font-medium"
+                  placeholder="e.g. anshuman@school.com or mobile"
                   required
                 />
               </div>
@@ -107,7 +154,7 @@ export default function Login() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-all"
+                  className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-all font-medium"
                   placeholder="Enter password"
                   required
                 />

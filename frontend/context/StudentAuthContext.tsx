@@ -14,6 +14,7 @@ interface Student {
   address?: any;
   documents?: any;
   bankDetails?: any;
+  status?: string;
 }
 
 interface StudentAuthContextType {

@@ -92,6 +92,24 @@ type ApprovedStudentResult = {
   defaultPassword: string;
 };
 
+const ADMISSION_CLASSES = [
+  "Nursery",
+  "LKG",
+  "UKG",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "11",
+  "12"
+];
+
 export default function Admissions() {
   const { token, user } = useAuth();
   const isSuperAdmin = user?.role === "super_admin";
@@ -503,9 +521,11 @@ export default function Admissions() {
                 className="input text-xs font-semibold py-2 px-3 text-slate-700 w-36"
               >
                 <option value="all">All Classes</option>
-                <option value="8">Class 8</option>
-                <option value="9">Class 9</option>
-                <option value="10">Class 10</option>
+                {ADMISSION_CLASSES.map((c) => (
+                  <option key={c} value={c}>
+                    {["Nursery", "LKG", "UKG"].includes(c) ? c : `Class ${c}`}
+                  </option>
+                ))}
               </select>
 
               {/* Search Bar */}
@@ -592,7 +612,7 @@ export default function Admissions() {
                     </div>
 
                     {/* Action Buttons Right */}
-                    <div className="flex flex-wrap items-center gap-2 self-end lg:self-center">
+                    <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-start sm:justify-end pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100">
                       <button
                         onClick={() => setSelectedApp(app)}
                         className="btn btn-secondary px-3.5 py-2 text-xs font-semibold flex items-center gap-1.5 text-slate-700"
@@ -709,34 +729,34 @@ export default function Admissions() {
 
         {/* View Application Details Modal */}
         {selectedApp && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-            <div className="bg-white rounded-3xl max-w-3xl w-full max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-slate-100">
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200">
+            <div className="bg-white rounded-2xl sm:rounded-3xl max-w-3xl w-full max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-slate-100">
               {/* Modal Header */}
-              <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center font-black">
+              <div className="p-4 sm:p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 gap-2">
+                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center font-black shrink-0">
                     <FileText className="w-5 h-5" />
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-lg font-black text-slate-900">{selectedApp.student.name}</h2>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                      <h2 className="text-base sm:text-lg font-black text-slate-900 truncate">{selectedApp.student.name}</h2>
                       {getStatusBadge(selectedApp.status)}
                     </div>
-                    <p className="text-xs text-slate-500 font-mono">
+                    <p className="text-[11px] sm:text-xs text-slate-500 font-mono">
                       Application ID: <strong className="text-blue-700">{selectedApp.applicationId}</strong>
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={() => setSelectedApp(null)}
-                  className="p-2 hover:bg-slate-200/60 rounded-xl transition-all text-slate-400"
+                  className="p-1.5 sm:p-2 hover:bg-slate-200/60 rounded-xl transition-all text-slate-400 shrink-0"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               {/* Modal Content */}
-              <div className="p-6 overflow-y-auto space-y-6">
+              <div className="p-4 sm:p-6 overflow-y-auto space-y-4 sm:space-y-6">
                 {/* Authorization Notice for Admins */}
                 {!isSuperAdmin && (selectedApp.status === "submitted" || selectedApp.status === "pending_verification") && (
                   <div className="p-4 bg-amber-50 rounded-2xl border border-amber-200 flex items-start gap-3">
