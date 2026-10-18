@@ -736,166 +736,166 @@ export default function CertificatesPage() {
                 </div>
 
                 {/* Printable Document Body */}
-                <div id="printable-certificate" className="p-4 sm:p-8 bg-white border-4 sm:border-8 border-double border-slate-900 rounded-xl sm:rounded-2xl print:border-none print:p-0 text-slate-900 font-serif leading-relaxed overflow-x-auto">
+                <div id="printable-certificate" className="p-4 sm:p-8 bg-white border-4 sm:border-8 border-double border-slate-900 rounded-xl sm:rounded-2xl print:border-2 print:border-slate-900 print:p-3 print:rounded-lg text-slate-900 font-serif leading-relaxed overflow-x-auto">
                   <div className="min-w-[560px]">
                   {/* School Crest & State Header */}
-                  <div className="flex items-center justify-between border-b-2 border-slate-900 pb-4">
+                  <div className="flex items-center justify-between border-b-2 border-slate-900 pb-3 print:pb-1.5">
                     <img
                       src="/5tlogo.png"
                       alt="5T Emblem"
-                      className="h-20 w-20 object-contain rounded-xl border border-slate-300"
+                      className="h-16 w-16 sm:h-20 sm:w-20 print:h-12 print:w-12 object-contain rounded-xl border border-slate-300"
                     />
                     <div className="text-center flex-1 px-4">
-                      <span className="text-[11px] font-sans font-black uppercase tracking-widest text-blue-900 block">
+                      <span className="text-[11px] print:text-[9px] font-sans font-black uppercase tracking-widest text-blue-900 block">
                         GOVERNMENT OF ODISHA • SCHOOL & MASS EDUCATION DEPARTMENT
                       </span>
-                      <h1 className="text-2xl md:text-3xl font-black font-sans tracking-tight text-slate-950 mt-0.5 uppercase">
+                      <h1 className="text-xl sm:text-2xl md:text-3xl print:text-lg font-black font-sans tracking-tight text-slate-950 mt-0.5 uppercase">
                         Dulichand Sonadevi High School
                       </h1>
-                      <p className="text-xs font-sans text-slate-700 font-semibold mt-0.5">
+                      <p className="text-xs print:text-[10px] font-sans text-slate-700 font-semibold mt-0.5">
                         At/Po: Ranamunduli, Via: Basta, Dist: Balasore, Odisha - 756029
                       </p>
-                      <p className="text-[11px] font-sans font-bold text-emerald-800 mt-0.5">
+                      <p className="text-[11px] print:text-[9px] font-sans font-bold text-emerald-800 mt-0.5">
                         School Code: 0408102 • UDISE: 21080314502 • Affiliated to BSE, Odisha
                       </p>
                     </div>
-                    <div className="w-20 text-center">
-                      <div className="w-16 h-16 rounded-xl border-2 border-dashed border-slate-300 mx-auto flex items-center justify-center text-[10px] font-sans text-slate-400 font-bold uppercase">
+                    <div className="w-16 print:w-12 text-center">
+                      <div className="w-16 h-16 print:w-12 print:h-14 rounded-xl border-2 border-dashed border-slate-300 mx-auto flex items-center justify-center text-[10px] print:text-[8px] font-sans text-slate-400 font-bold uppercase">
                         Affix Photo
                       </div>
                     </div>
                   </div>
 
                   {/* Certificate Title */}
-                  <div className="text-center my-5">
-                    <span className="inline-block px-8 py-1.5 rounded-full border-2 border-slate-900 bg-slate-100 font-sans font-black text-base uppercase tracking-wider">
+                  <div className="text-center my-3 print:my-1.5">
+                    <span className="inline-block px-6 py-1 print:px-4 print:py-0.5 rounded-full border-2 border-slate-900 bg-slate-100 font-sans font-black text-sm print:text-xs uppercase tracking-wider">
                       {selectedCert.certificateType === "transfer_certificate"
                         ? "TRANSFER CERTIFICATE / SCHOOL LEAVING CERTIFICATE"
                         : selectedCert.certificateType === "bonafide"
                         ? "BONAFIDE STUDENT CERTIFICATE"
                         : "CHARACTER & CONDUCT CERTIFICATE"}
                     </span>
-                    <div className="flex justify-between items-center text-xs font-sans font-bold text-slate-700 mt-2 px-2">
+                    <div className="flex justify-between items-center text-xs print:text-[9.5px] font-sans font-bold text-slate-700 mt-1.5 px-2">
                       <span>Book No: <strong>{selectedCert.bookNo}</strong></span>
-                      <span>Serial No: <strong className="text-blue-900 text-sm font-mono">{selectedCert.certificateNo}</strong></span>
+                      <span>Serial No: <strong className="text-blue-900 text-sm print:text-xs font-mono">{selectedCert.certificateNo}</strong></span>
                       <span>Admission No: <strong className="font-mono">{selectedCert.admissionNo}</strong></span>
                     </div>
                   </div>
 
-                  {/* Certificate Clauses (Formal 1 to 18) */}
-                  <div className="space-y-2.5 text-xs text-slate-900 px-2 py-2">
-                    <div className="flex border-b border-dotted border-slate-300 pb-1">
+                  {/* Certificate Clauses (Formal 1 to 17) */}
+                  <div className="space-y-1.5 print:space-y-0.5 text-xs print:text-[9.5px] text-slate-900 px-2 py-1 print:leading-tight">
+                    <div className="flex border-b border-dotted border-slate-300 pb-0.5">
                       <span className="w-72 font-semibold">1. Name of Pupil:</span>
-                      <strong className="flex-1 uppercase font-bold text-sm">{selectedCert.studentName}</strong>
+                      <strong className="flex-1 uppercase font-bold text-sm print:text-xs">{selectedCert.studentName}</strong>
                     </div>
 
-                    <div className="flex border-b border-dotted border-slate-300 pb-1">
+                    <div className="flex border-b border-dotted border-slate-300 pb-0.5">
                       <span className="w-72 font-semibold">2. Father's / Guardian's Name:</span>
                       <strong className="flex-1 uppercase">{selectedCert.fatherName || "N/A"}</strong>
                     </div>
 
-                    <div className="flex border-b border-dotted border-slate-300 pb-1">
+                    <div className="flex border-b border-dotted border-slate-300 pb-0.5">
                       <span className="w-72 font-semibold">3. Mother's Name:</span>
                       <strong className="flex-1 uppercase">{selectedCert.motherName || "N/A"}</strong>
                     </div>
 
-                    <div className="flex border-b border-dotted border-slate-300 pb-1">
+                    <div className="flex border-b border-dotted border-slate-300 pb-0.5">
                       <span className="w-72 font-semibold">4. Nationality & Category:</span>
                       <span className="flex-1 font-semibold">{selectedCert.nationality} • {selectedCert.category}</span>
                     </div>
 
-                    <div className="flex border-b border-dotted border-slate-300 pb-1">
+                    <div className="flex border-b border-dotted border-slate-300 pb-0.5">
                       <span className="w-72 font-semibold">5. Date of First Admission in School:</span>
                       <span className="flex-1 font-semibold">
                         {selectedCert.admissionDate ? new Date(selectedCert.admissionDate).toLocaleDateString("en-IN") : "-"} (Class {selectedCert.admissionClass || 8})
                       </span>
                     </div>
 
-                    <div className="flex border-b border-dotted border-slate-300 pb-1">
+                    <div className="flex border-b border-dotted border-slate-300 pb-0.5">
                       <span className="w-72 font-semibold">6. Date of Birth (in figures):</span>
                       <strong className="flex-1">
                         {selectedCert.dob ? new Date(selectedCert.dob).toLocaleDateString("en-IN") : "N/A"}
                       </strong>
                     </div>
 
-                    <div className="flex border-b border-dotted border-slate-300 pb-1">
+                    <div className="flex border-b border-dotted border-slate-300 pb-0.5">
                       <span className="w-72 font-semibold">7. Date of Birth (in words):</span>
                       <strong className="flex-1 uppercase font-bold text-blue-900">{selectedCert.dobInWords || "N/A"}</strong>
                     </div>
 
-                    <div className="flex border-b border-dotted border-slate-300 pb-1">
+                    <div className="flex border-b border-dotted border-slate-300 pb-0.5">
                       <span className="w-72 font-semibold">8. Class in which pupil last studied:</span>
                       <strong className="flex-1">Class {selectedCert.currentClass} (Academic Session {selectedCert.academicSession})</strong>
                     </div>
 
-                    <div className="flex border-b border-dotted border-slate-300 pb-1">
+                    <div className="flex border-b border-dotted border-slate-300 pb-0.5">
                       <span className="w-72 font-semibold">9. School / Board Annual Examination last taken:</span>
                       <span className="flex-1 font-semibold">{selectedCert.lastExamPassed}</span>
                     </div>
 
-                    <div className="flex border-b border-dotted border-slate-300 pb-1">
+                    <div className="flex border-b border-dotted border-slate-300 pb-0.5">
                       <span className="w-72 font-semibold">10. Subjects Studied:</span>
                       <span className="flex-1 font-semibold">
                         {(selectedCert.subjectsStudied || []).join(", ") || "Odia, English, Mathematics, Science, Social Science, Hindi/Sanskrit"}
                       </span>
                     </div>
 
-                    <div className="flex border-b border-dotted border-slate-300 pb-1">
+                    <div className="flex border-b border-dotted border-slate-300 pb-0.5">
                       <span className="w-72 font-semibold">11. Whether qualified for promotion:</span>
                       <strong className="flex-1 text-emerald-800">{selectedCert.qualifiedForPromotion}</strong>
                     </div>
 
-                    <div className="flex border-b border-dotted border-slate-300 pb-1">
+                    <div className="flex border-b border-dotted border-slate-300 pb-0.5">
                       <span className="w-72 font-semibold">12. Month up to which school dues paid:</span>
                       <span className="flex-1 font-semibold">{selectedCert.monthUptoDuesPaid}</span>
                     </div>
 
-                    <div className="flex border-b border-dotted border-slate-300 pb-1">
+                    <div className="flex border-b border-dotted border-slate-300 pb-0.5">
                       <span className="w-72 font-semibold">13. Total Attendance & Working Days:</span>
                       <span className="flex-1 font-semibold">
                         {selectedCert.totalAttendanceDays} Days attended out of {selectedCert.totalWorkingDays} Working Days
                       </span>
                     </div>
 
-                    <div className="flex border-b border-dotted border-slate-300 pb-1">
+                    <div className="flex border-b border-dotted border-slate-300 pb-0.5">
                       <span className="w-72 font-semibold">14. Whether NCC Cadet / Boy Scout / Guide:</span>
                       <span className="flex-1 font-semibold">{selectedCert.nccCadetOrScout}</span>
                     </div>
 
-                    <div className="flex border-b border-dotted border-slate-300 pb-1">
+                    <div className="flex border-b border-dotted border-slate-300 pb-0.5">
                       <span className="w-72 font-semibold">15. General Conduct & Character:</span>
                       <strong className="flex-1 text-slate-900">{selectedCert.generalConduct}</strong>
                     </div>
 
-                    <div className="flex border-b border-dotted border-slate-300 pb-1">
+                    <div className="flex border-b border-dotted border-slate-300 pb-0.5">
                       <span className="w-72 font-semibold">16. Reasons for leaving school:</span>
                       <strong className="flex-1 text-slate-900">{selectedCert.reasonForLeaving}</strong>
                     </div>
 
-                    <div className="flex border-b border-dotted border-slate-300 pb-1">
+                    <div className="flex border-b border-dotted border-slate-300 pb-0.5">
                       <span className="w-72 font-semibold">17. Any other remarks:</span>
                       <span className="flex-1 italic">{selectedCert.remarks}</span>
                     </div>
                   </div>
 
                   {/* Signatures & Seal Box */}
-                  <div className="grid grid-cols-3 gap-4 pt-12 mt-6 border-t border-slate-900 text-center font-sans text-xs">
+                  <div className="grid grid-cols-3 gap-4 pt-6 mt-3 print:pt-4 print:mt-2 border-t border-slate-900 text-center font-sans text-xs print:text-[9.5px]">
                     <div>
-                      <div className="h-10 border-b border-dashed border-slate-400 w-3/4 mx-auto" />
-                      <span className="font-extrabold text-slate-800 mt-2 block">Prepared By (Clerk)</span>
+                      <div className="h-8 print:h-6 border-b border-dashed border-slate-400 w-3/4 mx-auto" />
+                      <span className="font-extrabold text-slate-800 mt-1.5 block">Prepared By (Clerk)</span>
                     </div>
 
                     <div className="relative">
-                      <div className="w-20 h-20 rounded-full border-2 border-double border-slate-400 mx-auto -mt-6 flex items-center justify-center text-[10px] text-slate-400 font-black uppercase text-center p-1">
+                      <div className="w-16 h-16 print:w-12 print:h-12 rounded-full border-2 border-double border-slate-400 mx-auto -mt-4 print:-mt-2 flex items-center justify-center text-[9px] print:text-[7.5px] text-slate-400 font-black uppercase text-center p-1">
                         School Seal
                       </div>
-                      <span className="font-extrabold text-slate-800 mt-2 block">Checked By (Senior Faculty)</span>
+                      <span className="font-extrabold text-slate-800 mt-1.5 block">Checked By (Senior Faculty)</span>
                     </div>
 
                     <div>
-                      <div className="h-10 border-b border-dashed border-slate-400 w-3/4 mx-auto" />
-                      <span className="font-extrabold text-slate-800 mt-2 block">Headmaster / Principal</span>
-                      <span className="text-[10px] text-slate-500 block">Dulichand Sonadevi High School</span>
+                      <div className="h-8 print:h-6 border-b border-dashed border-slate-400 w-3/4 mx-auto" />
+                      <span className="font-extrabold text-slate-800 mt-1.5 block">Headmaster / Principal</span>
+                      <span className="text-[10px] print:text-[8px] text-slate-500 block">Dulichand Sonadevi High School</span>
                     </div>
                   </div>
                   </div>

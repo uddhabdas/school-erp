@@ -443,52 +443,52 @@ export default function TrackAdmissionPage() {
                 <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
               </div>
             ) : (
-              <div id="printable-slip" className="p-8 bg-white border-2 border-slate-900 rounded-2xl print:border-none print:p-0 text-slate-900 font-sans text-xs">
+              <div id="printable-slip" className="p-6 sm:p-8 bg-white border-2 border-slate-900 rounded-2xl print:border-2 print:border-slate-900 print:p-4 print:rounded-lg text-slate-900 font-sans text-xs">
                 {/* Header */}
-                <div className="flex items-center justify-between border-b-2 border-slate-900 pb-4">
+                <div className="flex items-center justify-between border-b-2 border-slate-900 pb-3 print:pb-2">
                   <img
                     src="/5tlogo.png"
                     alt="Emblem"
-                    className="h-16 w-16 object-contain rounded-xl border border-slate-300"
+                    className="h-16 w-16 print:h-12 print:w-12 object-contain rounded-xl border border-slate-300"
                   />
                   <div className="text-center flex-1 px-4">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-blue-900 block">
+                    <span className="text-[10px] print:text-[9px] font-bold uppercase tracking-widest text-blue-900 block">
                       GOVERNMENT OF ODISHA • SCHOOL & MASS EDUCATION DEPARTMENT
                     </span>
-                    <h1 className="text-xl md:text-2xl font-black tracking-tight text-slate-950 uppercase mt-0.5">
+                    <h1 className="text-xl md:text-2xl print:text-lg font-black tracking-tight text-slate-950 uppercase mt-0.5">
                       {slipData.school.name}
                     </h1>
-                    <p className="text-xs text-slate-700 font-medium">
+                    <p className="text-xs print:text-[10px] text-slate-700 font-medium">
                       {slipData.school.address}
                     </p>
-                    <p className="text-[10px] font-bold text-emerald-800">
+                    <p className="text-[10px] print:text-[9px] font-bold text-emerald-800">
                       5T High School Transformation | School Code: {slipData.school.schoolCode}
                     </p>
                   </div>
-                  <div className="w-16 text-center">
-                    <div className="w-14 h-16 rounded border border-slate-400 mx-auto flex items-center justify-center text-[9px] text-slate-400 uppercase font-bold text-center p-1">
+                  <div className="w-16 print:w-12 text-center">
+                    <div className="w-14 h-16 print:w-12 print:h-14 rounded border border-slate-400 mx-auto flex items-center justify-center text-[9px] print:text-[8px] text-slate-400 uppercase font-bold text-center p-1">
                       Affix Photo
                     </div>
                   </div>
                 </div>
 
                 {/* Slip Title */}
-                <div className="text-center my-4">
-                  <span className="inline-block px-6 py-1 rounded-full bg-slate-900 text-white font-black text-xs uppercase tracking-wider">
+                <div className="text-center my-3 print:my-2">
+                  <span className="inline-block px-6 py-1 print:px-4 print:py-0.5 rounded-full bg-slate-900 text-white font-black text-xs print:text-[11px] uppercase tracking-wider">
                     ONLINE ADMISSION APPLICATION ACKNOWLEDGMENT SLIP (2026-2027)
                   </span>
                 </div>
 
                 {/* Details Grid */}
-                <div className="border border-slate-300 rounded-xl overflow-hidden mb-4">
-                  <div className="grid grid-cols-2 bg-slate-50 border-b border-slate-300 p-2.5">
+                <div className="border border-slate-300 rounded-xl overflow-hidden mb-3 print:mb-2">
+                  <div className="grid grid-cols-2 bg-slate-50 border-b border-slate-300 p-2.5 print:p-1.5">
                     <div>
-                      <span className="text-[10px] text-slate-500 font-bold uppercase block">Registration No:</span>
-                      <strong className="text-sm font-mono text-blue-900">{slipData.application.applicationId}</strong>
+                      <span className="text-[10px] print:text-[9px] text-slate-500 font-bold uppercase block">Registration No:</span>
+                      <strong className="text-sm print:text-xs font-mono text-blue-900">{slipData.application.applicationId}</strong>
                     </div>
                     <div>
-                      <span className="text-[10px] text-slate-500 font-bold uppercase block">Submission Date:</span>
-                      <strong className="text-sm">
+                      <span className="text-[10px] print:text-[9px] text-slate-500 font-bold uppercase block">Submission Date:</span>
+                      <strong className="text-sm print:text-xs">
                         {new Date(slipData.application.createdAt).toLocaleDateString("en-IN", {
                           day: "numeric",
                           month: "long",
@@ -498,61 +498,61 @@ export default function TrackAdmissionPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 border-b border-slate-300 p-2.5">
+                  <div className="grid grid-cols-2 border-b border-slate-300 p-2.5 print:p-1.5">
                     <div>
-                      <span className="text-[10px] text-slate-500 font-bold uppercase block">Pupil's Full Name:</span>
-                      <strong className="text-sm uppercase">{slipData.application.personal?.name}</strong>
+                      <span className="text-[10px] print:text-[9px] text-slate-500 font-bold uppercase block">Pupil's Full Name:</span>
+                      <strong className="text-sm print:text-xs uppercase">{slipData.application.personal?.name}</strong>
                     </div>
                     <div>
-                      <span className="text-[10px] text-slate-500 font-bold uppercase block">Applying for Class:</span>
-                      <strong className="text-sm text-emerald-800">Class {slipData.application.academic?.class}</strong>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 border-b border-slate-300 p-2.5 bg-slate-50/50">
-                    <div>
-                      <span className="text-[10px] text-slate-500 font-bold uppercase block">Father's Name:</span>
-                      <strong>{slipData.application.parents?.fatherName || "N/A"}</strong>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-slate-500 font-bold uppercase block">Mother's Name:</span>
-                      <strong>{slipData.application.parents?.motherName || "N/A"}</strong>
+                      <span className="text-[10px] print:text-[9px] text-slate-500 font-bold uppercase block">Applying for Class:</span>
+                      <strong className="text-sm print:text-xs text-emerald-800">Class {slipData.application.academic?.class}</strong>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 p-2.5">
+                  <div className="grid grid-cols-2 border-b border-slate-300 p-2.5 print:p-1.5 bg-slate-50/50">
                     <div>
-                      <span className="text-[10px] text-slate-500 font-bold uppercase block">Date of Birth:</span>
-                      <strong>
+                      <span className="text-[10px] print:text-[9px] text-slate-500 font-bold uppercase block">Father's Name:</span>
+                      <strong className="text-xs print:text-[11px]">{slipData.application.parents?.fatherName || "N/A"}</strong>
+                    </div>
+                    <div>
+                      <span className="text-[10px] print:text-[9px] text-slate-500 font-bold uppercase block">Mother's Name:</span>
+                      <strong className="text-xs print:text-[11px]">{slipData.application.parents?.motherName || "N/A"}</strong>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 p-2.5 print:p-1.5">
+                    <div>
+                      <span className="text-[10px] print:text-[9px] text-slate-500 font-bold uppercase block">Date of Birth:</span>
+                      <strong className="text-xs print:text-[11px]">
                         {slipData.application.personal?.dob
                           ? new Date(slipData.application.personal.dob).toLocaleDateString("en-IN")
                           : "N/A"}
                       </strong>
                     </div>
                     <div>
-                      <span className="text-[10px] text-slate-500 font-bold uppercase block">Contact Mobile:</span>
-                      <strong className="font-mono">{slipData.application.parents?.parentMobile || slipData.application.personal?.mobile || "N/A"}</strong>
+                      <span className="text-[10px] print:text-[9px] text-slate-500 font-bold uppercase block">Contact Mobile:</span>
+                      <strong className="font-mono text-xs print:text-[11px]">{slipData.application.parents?.parentMobile || slipData.application.personal?.mobile || "N/A"}</strong>
                     </div>
                   </div>
                 </div>
 
                 {/* Instructions Box */}
-                <div className="border border-dashed border-slate-400 p-3 rounded-xl bg-slate-50 mb-6 space-y-1 text-[11px] text-slate-700">
+                <div className="border border-dashed border-slate-400 p-3 print:p-2 rounded-xl bg-slate-50 mb-4 print:mb-2 space-y-1 text-[11px] print:text-[9.5px] text-slate-700">
                   <strong className="text-slate-900 block font-bold">Physical Verification Instructions:</strong>
                   <p>• The parent/guardian must present this slip along with original documents at Dulichand Sonadevi High School office within 7 working days.</p>
                   <p>• Required Documents: Original Birth Certificate, Aadhaar Card, Transfer Certificate from previous school, and 3 passport photographs.</p>
                 </div>
 
                 {/* Counter Foil Signatures */}
-                <div className="grid grid-cols-2 gap-8 pt-8 border-t border-slate-400 text-center">
+                <div className="grid grid-cols-2 gap-8 print:gap-4 pt-6 print:pt-3 border-t border-slate-400 text-center text-xs print:text-[10px]">
                   <div>
-                    <div className="h-8 border-b border-dashed border-slate-400 w-3/4 mx-auto" />
-                    <span className="font-bold text-slate-800 mt-2 block">Signature of Parent / Guardian</span>
+                    <div className="h-7 print:h-5 border-b border-dashed border-slate-400 w-3/4 mx-auto" />
+                    <span className="font-bold text-slate-800 mt-1.5 block">Signature of Parent / Guardian</span>
                   </div>
 
                   <div>
-                    <div className="h-8 border-b border-dashed border-slate-400 w-3/4 mx-auto" />
-                    <span className="font-bold text-slate-800 mt-2 block">Receiving Clerk / Verifier (School Seal)</span>
+                    <div className="h-7 print:h-5 border-b border-dashed border-slate-400 w-3/4 mx-auto" />
+                    <span className="font-bold text-slate-800 mt-1.5 block">Receiving Clerk / Verifier (School Seal)</span>
                   </div>
                 </div>
               </div>

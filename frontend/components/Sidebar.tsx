@@ -203,7 +203,7 @@ export const Sidebar = () => {
   return (
     <>
       {/* Mobile Top App Header for Phones */}
-      <header className="md:hidden sticky top-0 z-30 bg-slate-900 text-white px-4 py-3 flex items-center justify-between border-b border-slate-800 shadow-md shrink-0">
+      <header className="md:hidden sticky top-0 z-30 bg-slate-900 text-white px-4 py-3 flex items-center justify-between border-b border-slate-800 shadow-md shrink-0 print:hidden">
         <div className="flex items-center gap-2.5">
           <button
             onClick={() => setIsOpen(true)}
@@ -242,14 +242,14 @@ export const Sidebar = () => {
       {/* Mobile Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden transition-opacity"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden transition-opacity print:hidden"
           onClick={() => setIsOpen(false)}
         />
       )}
 
       {/* Responsive Sidebar Drawer */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 md:z-40 w-72 max-w-[85vw] md:w-64 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white flex flex-col shadow-2xl transition-transform duration-300 ease-in-out border-r border-slate-800 ${
+        className={`fixed inset-y-0 left-0 z-50 md:z-40 w-72 max-w-[85vw] md:w-64 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white flex flex-col shadow-2xl transition-transform duration-300 ease-in-out border-r border-slate-800 print:hidden ${
           isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
       >

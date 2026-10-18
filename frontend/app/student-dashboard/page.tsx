@@ -296,7 +296,7 @@ export default function StudentDashboard() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row text-slate-900">
-      {/* 1-Page A4 Print Stylesheet for Report Cards & Fee Receipts */}
+      {/* 1-Page A4 Print Stylesheet for Report Cards, Fee Receipts & Class Routines */}
       <style jsx global>{`
         @media print {
           @page {
@@ -304,35 +304,56 @@ export default function StudentDashboard() {
             margin: 4mm 6mm;
           }
           html, body {
-            height: 100% !important;
-            max-height: 100vh !important;
-            overflow: hidden !important;
+            width: 100% !important;
+            height: auto !important;
+            min-height: 100% !important;
+            max-height: none !important;
+            overflow: visible !important;
             margin: 0 !important;
             padding: 0 !important;
             background: white !important;
             color: black !important;
+          }
+          *, *::before, *::after {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+            color-adjust: exact !important;
           }
-          body * {
-            visibility: hidden !important;
+          #report-card-modal-backdrop,
+          #report-card-modal-dialog,
+          #receipt-modal-backdrop,
+          #receipt-modal-dialog,
+          .fixed.inset-0 {
+            position: static !important;
+            inset: auto !important;
+            width: 100% !important;
+            height: auto !important;
+            min-height: 0 !important;
+            max-height: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            overflow: visible !important;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            transform: none !important;
           }
           #printable-report-card,
-          #printable-report-card *,
           #printable-fee-receipt,
-          #printable-fee-receipt * {
+          #printable-routine {
+            display: block !important;
             visibility: visible !important;
-          }
-          #printable-report-card,
-          #printable-fee-receipt {
-            position: absolute !important;
-            left: 0 !important;
-            top: 0 !important;
+            position: relative !important;
+            left: auto !important;
+            top: auto !important;
             width: 100% !important;
             max-width: 100% !important;
+            max-height: 275mm !important;
             height: auto !important;
-            margin: 0 !important;
-            padding: 10px 14px !important;
+            margin: 0 auto !important;
+            padding: 6px 10px !important;
             background: white !important;
             color: black !important;
             box-shadow: none !important;
@@ -340,7 +361,15 @@ export default function StudentDashboard() {
             border-radius: 6px !important;
             page-break-after: avoid !important;
             page-break-inside: avoid !important;
-            z-index: 9999999 !important;
+            page-break-before: avoid !important;
+            break-after: avoid !important;
+            break-inside: avoid !important;
+            break-before: avoid !important;
+            overflow: hidden !important;
+          }
+          #printable-fee-receipt {
+            border: none !important;
+            padding: 0 !important;
           }
           .print-hidden, .print\\:hidden, button {
             display: none !important;
@@ -349,7 +378,7 @@ export default function StudentDashboard() {
       `}</style>
 
       {/* Mobile Top App Header */}
-      <header className="md:hidden sticky top-0 z-30 bg-slate-900 text-white px-4 py-3 flex items-center justify-between border-b border-slate-800 shadow-md shrink-0">
+      <header className="md:hidden sticky top-0 z-30 bg-slate-900 text-white px-4 py-3 flex items-center justify-between border-b border-slate-800 shadow-md shrink-0 print:hidden">
         <div className="flex items-center gap-2.5">
           <button
             onClick={() => setMobileMenuOpen(true)}
@@ -394,14 +423,14 @@ export default function StudentDashboard() {
       {/* Mobile Backdrop */}
       {mobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden transition-opacity"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden transition-opacity print:hidden"
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
 
       {/* Fixed Left Sidebar (Matches Admin Sidebar Theme) */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 md:z-40 w-72 max-w-[85vw] md:w-64 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white flex flex-col shadow-2xl transition-transform duration-300 ease-in-out border-r border-slate-800 ${
+        className={`fixed inset-y-0 left-0 z-50 md:z-40 w-72 max-w-[85vw] md:w-64 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white flex flex-col shadow-2xl transition-transform duration-300 ease-in-out border-r border-slate-800 print:hidden ${
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
       >
@@ -530,7 +559,7 @@ export default function StudentDashboard() {
       </div>
 
       {/* Main Content Area (Matches DashboardLayout in Admin) */}
-      <main className="flex-1 w-full md:ml-64 p-3.5 sm:p-5 md:p-8 min-w-0 overflow-x-hidden space-y-6 sm:space-y-8">
+      <main className="flex-1 w-full md:ml-64 p-3.5 sm:p-5 md:p-8 min-w-0 overflow-x-hidden space-y-6 sm:space-y-8 print:hidden">
         {/* Welcome Header Banner */}
         <div className="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-xl relative overflow-hidden">
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
@@ -723,115 +752,199 @@ export default function StudentDashboard() {
 
         {/* ======================= TAB 2: TIMETABLE ======================= */}
         {activeTab === "timetable" && (
-          <div className="card p-6 border border-slate-100 shadow-sm space-y-6 animate-fadeIn">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
-              <div>
-                <h2 className="text-lg font-black text-slate-900 flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-blue-600" />
-                  Class Weekly Routine (Class {classTimetable?.class || student?.academic?.class}-{classTimetable?.section || "A"})
-                </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Class Teacher: <strong className="text-slate-700">{classTimetable?.classTeacher || "Class Teacher"}</strong> • Room: <strong className="text-slate-700">{classTimetable?.roomNo || "Room 101"}</strong>
-                </p>
+          <>
+            <div className="card p-6 border border-slate-100 shadow-sm space-y-6 animate-fadeIn print:hidden">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+                <div>
+                  <h2 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-blue-600" />
+                    Class Weekly Routine (Class {classTimetable?.class || student?.academic?.class}-{classTimetable?.section || "A"})
+                  </h2>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Class Teacher: <strong className="text-slate-700">{classTimetable?.classTeacher || "Class Teacher"}</strong> • Room: <strong className="text-slate-700">{classTimetable?.roomNo || "Room 101"}</strong>
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => window.print()}
+                  className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow transition self-start sm:self-auto"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>Print Routine</span>
+                </button>
               </div>
 
-              <button
-                onClick={() => window.print()}
-                className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow transition self-start sm:self-auto"
-              >
-                <Printer className="w-3.5 h-3.5" />
-                <span>Print Routine</span>
-              </button>
-            </div>
-
-            {/* Day Switcher Buttons */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-              {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].map((day) => (
-                <button
-                  key={day}
-                  onClick={() => setSelectedDay(day)}
-                  className={`px-3.5 py-1.5 rounded-xl font-bold text-xs transition whitespace-nowrap ${
-                    selectedDay === day
-                      ? "bg-blue-600 text-white shadow-md shadow-blue-200"
-                      : "bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200"
-                  }`}
-                >
-                  {day}
-                </button>
-              ))}
-            </div>
-
-            {/* Day Period Cards */}
-            {todaySchedule ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 pt-2">
-                {todaySchedule.periods.map((p: any) => (
-                  <div
-                    key={p.periodNo}
-                    className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 hover:border-blue-300 transition flex flex-col justify-between space-y-3"
+              {/* Day Switcher Buttons */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].map((day) => (
+                  <button
+                    key={day}
+                    onClick={() => setSelectedDay(day)}
+                    className={`px-3.5 py-1.5 rounded-xl font-bold text-xs transition whitespace-nowrap ${
+                      selectedDay === day
+                        ? "bg-blue-600 text-white shadow-md shadow-blue-200"
+                        : "bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200"
+                    }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 font-black text-xs flex items-center justify-center">
-                        P{p.periodNo}
-                      </span>
-                      <span className="font-mono text-[11px] font-bold text-slate-700 bg-white px-2 py-0.5 rounded-md border border-slate-200">
-                        {p.startTime} - {p.endTime}
-                      </span>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-slate-900">{p.subject}</h4>
-                      <p className="text-xs text-slate-500 mt-1">{p.teacherName}</p>
-                    </div>
-                  </div>
+                    {day}
+                  </button>
                 ))}
               </div>
-            ) : (
-              <div className="p-8 text-center text-slate-400 text-xs">
-                No routine schedule available for {selectedDay}.
-              </div>
-            )}
 
-            {/* Complete Weekly Grid */}
-            <div className="pt-4 border-t border-slate-100 space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">Complete Weekly Grid</h3>
-              <div className="overflow-x-auto rounded-xl border border-slate-200">
-                <table className="w-full text-left border-collapse text-xs min-w-[700px]">
+              {/* Day Period Cards */}
+              {todaySchedule ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 pt-2">
+                  {todaySchedule.periods.map((p: any) => (
+                    <div
+                      key={p.periodNo}
+                      className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 hover:border-blue-300 transition flex flex-col justify-between space-y-3"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 font-black text-xs flex items-center justify-center">
+                          P{p.periodNo}
+                        </span>
+                        <span className="font-mono text-[11px] font-bold text-slate-700 bg-white px-2 py-0.5 rounded-md border border-slate-200">
+                          {p.startTime} - {p.endTime}
+                        </span>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-slate-900">{p.subject}</h4>
+                        <p className="text-xs text-slate-500 mt-1">{p.teacherName}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-8 text-center text-slate-400 text-xs">
+                  No routine schedule available for {selectedDay}.
+                </div>
+              )}
+
+              {/* Complete Weekly Grid */}
+              <div className="pt-4 border-t border-slate-100 space-y-3">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">Complete Weekly Grid</h3>
+                <div className="overflow-x-auto rounded-xl border border-slate-200">
+                  <table className="w-full text-left border-collapse text-xs min-w-[700px]">
+                    <thead>
+                      <tr className="bg-slate-900 text-white font-extrabold uppercase text-center border-b border-slate-800">
+                        <th className="py-2.5 px-3 text-left w-24">Day</th>
+                        <th className="py-2 px-1">P1</th>
+                        <th className="py-2 px-1">P2</th>
+                        <th className="py-2 px-1">P3</th>
+                        <th className="py-2 px-1">P4</th>
+                        <th className="py-2 px-1 bg-slate-800 text-amber-300 w-12 text-[10px]">Break</th>
+                        <th className="py-2 px-1">P5</th>
+                        <th className="py-2 px-1">P6</th>
+                        <th className="py-2 px-1">P7</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200 bg-white">
+                      {(classTimetable?.weeklySchedule || []).map((dayItem: any) => (
+                        <tr
+                          key={dayItem.day}
+                          className={`hover:bg-slate-50 transition ${
+                            dayItem.day === selectedDay ? "bg-blue-50/50" : ""
+                          }`}
+                        >
+                          <td className="py-2.5 px-3 font-bold text-slate-900 border-r border-slate-200">
+                            {dayItem.day}
+                          </td>
+                          {(dayItem.periods || []).slice(0, 4).map((p: any, i: number) => (
+                            <td key={i} className="py-2 px-1 text-center border-r border-slate-100">
+                              <span className="block text-[11px] font-bold text-slate-800">{p.subject}</span>
+                              <span className="text-[10px] text-slate-400 block truncate">{p.teacherName}</span>
+                            </td>
+                          ))}
+                          <td className="py-2 px-1 text-center bg-slate-100 text-[10px] text-slate-500 border-r border-slate-200 font-bold">
+                            Lunch
+                          </td>
+                          {(dayItem.periods || []).slice(4, 7).map((p: any, i: number) => (
+                            <td key={i + 4} className="py-2 px-1 text-center border-r border-slate-100">
+                              <span className="block text-[11px] font-bold text-slate-800">{p.subject}</span>
+                              <span className="text-[10px] text-slate-400 block truncate">{p.teacherName}</span>
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            {/* OFFICIAL 1-PAGE PRINTABLE ROUTINE (A4) */}
+            <div id="printable-routine" className="hidden print:block bg-white text-slate-900 font-sans text-xs">
+              {/* Header */}
+              <div className="flex items-center justify-between border-b-2 border-slate-900 pb-2">
+                <img
+                  src="/5tlogo.png"
+                  alt="Emblem"
+                  className="h-12 w-12 object-contain rounded-xl border border-slate-300"
+                />
+                <div className="text-center flex-1 px-4">
+                  <span className="text-[9px] font-bold uppercase tracking-widest text-blue-900 block">
+                    GOVERNMENT OF ODISHA • SCHOOL & MASS EDUCATION DEPARTMENT
+                  </span>
+                  <h1 className="text-lg font-black tracking-tight text-slate-950 uppercase mt-0.5">
+                    Dulichand Sonadevi High School
+                  </h1>
+                  <p className="text-[10px] text-slate-700 font-medium">
+                    Ranamunduli, Basta, Balasore, Odisha - 756029
+                  </p>
+                  <p className="text-[9px] font-bold text-emerald-800">
+                    5T Transformation Initiative • Official Class Routine
+                  </p>
+                </div>
+                <div className="w-12" />
+              </div>
+
+              {/* Routine Title & Metadata */}
+              <div className="text-center my-2">
+                <span className="inline-block px-4 py-0.5 rounded-full bg-slate-900 text-white font-black text-[11px] uppercase tracking-wider">
+                  CLASS TIMETABLE & WEEKLY ACADEMIC SCHEDULE
+                </span>
+                <div className="flex justify-between items-center text-[10px] font-bold text-slate-800 mt-1.5 px-2">
+                  <span>Standard: <strong>Class {classTimetable?.class || student?.academic?.class} (Section {classTimetable?.section || "A"})</strong></span>
+                  <span>Classroom: <strong>{classTimetable?.roomNo || "Room 101"}</strong></span>
+                  <span>Class Teacher: <strong>{classTimetable?.classTeacher || "Class Teacher"}</strong></span>
+                </div>
+              </div>
+
+              {/* Schedule Table */}
+              <div className="border border-slate-900 rounded-xl overflow-hidden mb-2">
+                <table className="w-full text-left border-collapse text-[10px]">
                   <thead>
-                    <tr className="bg-slate-900 text-white font-extrabold uppercase text-center border-b border-slate-800">
-                      <th className="py-2.5 px-3 text-left w-24">Day</th>
-                      <th className="py-2 px-1">P1</th>
-                      <th className="py-2 px-1">P2</th>
-                      <th className="py-2 px-1">P3</th>
-                      <th className="py-2 px-1">P4</th>
-                      <th className="py-2 px-1 bg-slate-800 text-amber-300 w-12 text-[10px]">Break</th>
-                      <th className="py-2 px-1">P5</th>
-                      <th className="py-2 px-1">P6</th>
-                      <th className="py-2 px-1">P7</th>
+                    <tr className="bg-slate-900 text-white font-bold uppercase text-center border-b border-slate-900">
+                      <th className="py-1 px-1.5 text-left w-20 border-r border-slate-700">Day</th>
+                      <th className="py-1 px-1 border-r border-slate-700">P1 (10:00-10:45)</th>
+                      <th className="py-1 px-1 border-r border-slate-700">P2 (10:45-11:30)</th>
+                      <th className="py-1 px-1 border-r border-slate-700">P3 (11:30-12:15)</th>
+                      <th className="py-1 px-1 border-r border-slate-700">P4 (12:15-01:00)</th>
+                      <th className="py-1 px-1 bg-slate-800 text-amber-300 w-12 border-r border-slate-700 text-[9px]">Recess</th>
+                      <th className="py-1 px-1 border-r border-slate-700">P5 (01:40-02:20)</th>
+                      <th className="py-1 px-1 border-r border-slate-700">P6 (02:20-03:00)</th>
+                      <th className="py-1 px-1">P7 (03:00-03:40)</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-200 bg-white">
-                    {(classTimetable?.weeklySchedule || []).map((dayItem: any) => (
-                      <tr
-                        key={dayItem.day}
-                        className={`hover:bg-slate-50 transition ${
-                          dayItem.day === selectedDay ? "bg-blue-50/50" : ""
-                        }`}
-                      >
-                        <td className="py-2.5 px-3 font-bold text-slate-900 border-r border-slate-200">
-                          {dayItem.day}
+                  <tbody className="divide-y divide-slate-300 bg-white">
+                    {(classTimetable?.weeklySchedule || []).map((d: any) => (
+                      <tr key={d.day}>
+                        <td className="py-1 px-1.5 font-bold text-slate-900 bg-slate-50 border-r border-slate-300">
+                          {d.day}
                         </td>
-                        {(dayItem.periods || []).slice(0, 4).map((p: any, i: number) => (
-                          <td key={i} className="py-2 px-1 text-center border-r border-slate-100">
-                            <span className="block text-[11px] font-bold text-slate-800">{p.subject}</span>
-                            <span className="text-[10px] text-slate-400 block truncate">{p.teacherName}</span>
+                        {(d.periods || []).slice(0, 4).map((p: any, i: number) => (
+                          <td key={i} className="py-1 px-1 text-center border-r border-slate-300">
+                            <strong className="block text-[9.5px] font-bold text-slate-900">{p.subject}</strong>
+                            <span className="text-[8px] text-slate-500 block truncate">{p.teacherName}</span>
                           </td>
                         ))}
-                        <td className="py-2 px-1 text-center bg-slate-100 text-[10px] text-slate-500 border-r border-slate-200 font-bold">
-                          Lunch
+                        <td className="py-1 px-1 text-center bg-slate-100 text-[8px] font-bold text-slate-400 border-r border-slate-300">
+                          Break
                         </td>
-                        {(dayItem.periods || []).slice(4, 7).map((p: any, i: number) => (
-                          <td key={i + 4} className="py-2 px-1 text-center border-r border-slate-100">
-                            <span className="block text-[11px] font-bold text-slate-800">{p.subject}</span>
-                            <span className="text-[10px] text-slate-400 block truncate">{p.teacherName}</span>
+                        {(d.periods || []).slice(4, 7).map((p: any, i: number) => (
+                          <td key={i + 4} className="py-1 px-1 text-center border-r border-slate-300">
+                            <strong className="block text-[9.5px] font-bold text-slate-900">{p.subject}</strong>
+                            <span className="text-[8px] text-slate-500 block truncate">{p.teacherName}</span>
                           </td>
                         ))}
                       </tr>
@@ -839,8 +952,21 @@ export default function StudentDashboard() {
                   </tbody>
                 </table>
               </div>
+
+              {/* Signatures */}
+              <div className="grid grid-cols-2 gap-4 pt-3 border-t border-slate-400 text-center font-bold text-[10px]">
+                <div>
+                  <div className="h-5 border-b border-dashed border-slate-400 w-1/2 mx-auto" />
+                  <span className="mt-1 block">Class Teacher Signature</span>
+                </div>
+
+                <div>
+                  <div className="h-5 border-b border-dashed border-slate-400 w-1/2 mx-auto" />
+                  <span className="mt-1 block">Headmaster / Principal (Seal)</span>
+                </div>
+              </div>
             </div>
-          </div>
+          </>
         )}
 
         {/* ======================= TAB 3: EXAMS ======================= */}
@@ -1191,8 +1317,8 @@ export default function StudentDashboard() {
 
       {/* ======================= REPORT CARD PRINT MODAL ======================= */}
       {reportModalOpen && (
-        <div id="report-card-modal-backdrop" className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto animate-in fade-in">
-          <div id="report-card-modal-dialog" className="bg-white rounded-3xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl max-h-[95vh] overflow-y-auto text-slate-900 border border-slate-200">
+        <div id="report-card-modal-backdrop" className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto animate-in fade-in print:static print:inset-auto print:p-0 print:m-0 print:bg-transparent print:overflow-visible print:border-none print:shadow-none print:max-h-none">
+          <div id="report-card-modal-dialog" className="bg-white rounded-3xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl max-h-[95vh] overflow-y-auto text-slate-900 border border-slate-200 print:static print:inset-auto print:p-0 print:m-0 print:bg-transparent print:overflow-visible print:border-none print:shadow-none print:max-h-none">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4 print:hidden gap-2">
               <div className="flex items-center gap-2.5 min-w-0">
                 <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-200 shadow-xs shrink-0">
@@ -1225,167 +1351,188 @@ export default function StudentDashboard() {
                 <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
               </div>
             ) : (
-              <div id="printable-report-card" className="p-3 sm:p-5 bg-white border-2 border-slate-900 rounded-xl print:border-2 print:border-slate-900 print:p-2 text-slate-900 font-sans">
+              <div id="printable-report-card" className="p-2 sm:p-3 bg-white border-2 border-slate-900 rounded-xl print:border-2 print:border-slate-900 print:p-2 text-slate-900 font-sans">
                 {/* School Header */}
-                <div className="flex items-center justify-between border-b-2 border-slate-900 pb-2">
+                <div className="flex items-center justify-between border-b-2 border-slate-900 pb-1.5">
                   <img
                     src="/5tlogo.png"
                     alt="5T Odisha Emblem"
-                    className="h-14 w-14 object-contain rounded-lg border border-slate-300 shrink-0"
+                    className="h-12 w-12 print:h-10 print:w-10 object-contain rounded-lg border border-slate-300 shrink-0"
                   />
-                  <div className="text-center flex-1 px-3">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-blue-900 block">
+                  <div className="text-center flex-1 px-2">
+                    <span className="text-[9px] print:text-[8px] font-black uppercase tracking-widest text-blue-900 block">
                       GOVERNMENT OF ODISHA • SCHOOL & MASS EDUCATION DEPT.
                     </span>
-                    <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-950 mt-0.5 leading-tight">
+                    <h1 className="text-lg sm:text-xl print:text-base font-black tracking-tight text-slate-950 mt-0.5 leading-tight">
                       {reportCardData.school.name}
                     </h1>
-                    <p className="text-[11px] text-slate-700 font-semibold">
+                    <p className="text-[10px] print:text-[8.5px] text-slate-700 font-semibold leading-tight">
                       {reportCardData.school.address}
                     </p>
-                    <p className="text-[10px] font-bold text-emerald-800">
+                    <p className="text-[10px] print:text-[8.5px] font-bold text-emerald-800 leading-tight">
                       {reportCardData.school.tagline} • Affiliated to {reportCardData.school.board}
                     </p>
                   </div>
-                  <div className="w-14 text-center shrink-0">
-                    <div className="w-12 h-14 rounded-lg border-2 border-dashed border-slate-300 mx-auto flex items-center justify-center text-[9px] text-slate-400 font-bold uppercase text-center p-0.5">
+                  <div className="w-12 text-center shrink-0">
+                    <div className="w-12 h-14 print:w-10 print:h-11 rounded-lg border-2 border-dashed border-slate-300 mx-auto flex items-center justify-center text-[8px] print:text-[7px] text-slate-400 font-bold uppercase text-center p-0.5">
                       Affix Photo
                     </div>
                   </div>
                 </div>
 
                 {/* Report Card Title */}
-                <div className="text-center my-2">
-                  <span className="inline-block px-4 py-1 rounded-full bg-slate-900 text-white font-black text-xs uppercase tracking-wider">
+                <div className="text-center my-1.5 print:my-1">
+                  <span className="inline-block px-3 py-0.5 print:px-2 print:py-0.5 rounded-full bg-slate-900 text-white font-black text-[11px] print:text-[9px] uppercase tracking-wider">
                     ANNUAL STUDENT PROGRESS REPORT CARD - {reportCardData.exam.academicSession}
                   </span>
-                  <p className="text-[11px] font-bold text-slate-600 mt-0.5">
+                  <p className="text-[10px] print:text-[8.5px] font-bold text-slate-600 mt-0.5">
                     {reportCardData.exam.title} (Class {reportCardData.student.class})
                   </p>
                 </div>
 
                 {/* Student Biodata */}
-                <div className="border border-slate-400 rounded-lg overflow-hidden mb-2.5 text-[11px]">
+                <div className="border border-slate-400 rounded-lg overflow-hidden mb-1.5 print:mb-1 text-[10px] print:text-[8.5px]">
                   <div className="grid grid-cols-4 bg-slate-50 border-b border-slate-300">
-                    <div className="p-1.5 border-r border-slate-300">
-                      <span className="text-[9px] text-slate-500 font-bold uppercase block">Student Name</span>
-                      <span className="font-black text-slate-900 text-xs">{reportCardData.student.name}</span>
+                    <div className="p-1 print:p-0.5 px-1.5 border-r border-slate-300">
+                      <span className="text-[8px] print:text-[7px] text-slate-500 font-bold uppercase block leading-tight">Student Name</span>
+                      <span className="font-black text-slate-900 text-[11px] print:text-[9.5px] truncate block">{reportCardData.student.name}</span>
                     </div>
-                    <div className="p-1.5 border-r border-slate-300">
-                      <span className="text-[9px] text-slate-500 font-bold uppercase block">Roll Number</span>
-                      <span className="font-extrabold text-slate-900">{reportCardData.student.rollNo || "N/A"}</span>
+                    <div className="p-1 print:p-0.5 px-1.5 border-r border-slate-300">
+                      <span className="text-[8px] print:text-[7px] text-slate-500 font-bold uppercase block leading-tight">Roll Number</span>
+                      <span className="font-extrabold text-slate-900 truncate block">{reportCardData.student.rollNo || "N/A"}</span>
                     </div>
-                    <div className="p-1.5 border-r border-slate-300">
-                      <span className="text-[9px] text-slate-500 font-bold uppercase block">Class & Section</span>
-                      <span className="font-extrabold text-slate-900">
+                    <div className="p-1 print:p-0.5 px-1.5 border-r border-slate-300">
+                      <span className="text-[8px] print:text-[7px] text-slate-500 font-bold uppercase block leading-tight">Class & Section</span>
+                      <span className="font-extrabold text-slate-900 truncate block">
                         Class {reportCardData.student.class} - {reportCardData.student.section}
                       </span>
                     </div>
-                    <div className="p-1.5">
-                      <span className="text-[9px] text-slate-500 font-bold uppercase block">Admission No</span>
-                      <span className="font-mono font-bold text-slate-800">{reportCardData.student.admissionNo}</span>
+                    <div className="p-1 print:p-0.5 px-1.5">
+                      <span className="text-[8px] print:text-[7px] text-slate-500 font-bold uppercase block leading-tight">Admission No</span>
+                      <span className="font-mono font-bold text-slate-800 truncate block">{reportCardData.student.admissionNo}</span>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-4 bg-white">
-                    <div className="p-1.5 border-r border-slate-300">
-                      <span className="text-[9px] text-slate-500 font-bold uppercase block">Father's Name</span>
-                      <span className="font-bold text-slate-800">{reportCardData.student.fatherName || "N/A"}</span>
+                    <div className="p-1 print:p-0.5 px-1.5 border-r border-slate-300">
+                      <span className="text-[8px] print:text-[7px] text-slate-500 font-bold uppercase block leading-tight">Father's Name</span>
+                      <span className="font-bold text-slate-800 truncate block">{reportCardData.student.fatherName || "N/A"}</span>
                     </div>
-                    <div className="p-1.5 border-r border-slate-300">
-                      <span className="text-[9px] text-slate-500 font-bold uppercase block">Mother's Name</span>
-                      <span className="font-bold text-slate-800">{reportCardData.student.motherName || "N/A"}</span>
+                    <div className="p-1 print:p-0.5 px-1.5 border-r border-slate-300">
+                      <span className="text-[8px] print:text-[7px] text-slate-500 font-bold uppercase block leading-tight">Mother's Name</span>
+                      <span className="font-bold text-slate-800 truncate block">{reportCardData.student.motherName || "N/A"}</span>
                     </div>
-                    <div className="p-1.5 border-r border-slate-300">
-                      <span className="text-[9px] text-slate-500 font-bold uppercase block">Date of Birth</span>
-                      <span className="font-bold text-slate-800">
+                    <div className="p-1 print:p-0.5 px-1.5 border-r border-slate-300">
+                      <span className="text-[8px] print:text-[7px] text-slate-500 font-bold uppercase block leading-tight">Date of Birth</span>
+                      <span className="font-bold text-slate-800 truncate block">
                         {reportCardData.student.dob ? new Date(reportCardData.student.dob).toLocaleDateString("en-IN") : "N/A"}
                       </span>
                     </div>
-                    <div className="p-1.5">
-                      <span className="text-[9px] text-slate-500 font-bold uppercase block">Student ID</span>
-                      <span className="font-mono font-bold text-slate-800">{reportCardData.student.studentId}</span>
+                    <div className="p-1 print:p-0.5 px-1.5">
+                      <span className="text-[8px] print:text-[7px] text-slate-500 font-bold uppercase block leading-tight">Student ID</span>
+                      <span className="font-mono font-bold text-slate-800 truncate block">{reportCardData.student.studentId}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Subject Marks Table */}
-                <div className="border border-slate-900 rounded-lg overflow-hidden mb-2.5">
-                  <table className="w-full text-left border-collapse text-[11px]">
+                <div className="border border-slate-900 rounded-lg overflow-hidden mb-1.5 print:mb-1">
+                  <table className="w-full text-left border-collapse text-[10px] print:text-[9px]">
                     <thead>
-                      <tr className="bg-slate-900 text-white font-extrabold uppercase text-[10px]">
-                        <th className="py-1.5 px-2.5 border-r border-slate-700 w-16">Code</th>
-                        <th className="py-1.5 px-2.5 border-r border-slate-700">Subject Name</th>
-                        <th className="py-1.5 px-2 text-center border-r border-slate-700 w-20">Max</th>
-                        <th className="py-1.5 px-2 text-center border-r border-slate-700 w-20">Pass</th>
-                        <th className="py-1.5 px-2 text-center border-r border-slate-700 w-24">Marks Secured</th>
-                        <th className="py-1.5 px-2 text-center w-16">Grade</th>
+                      <tr className="bg-slate-900 text-white font-extrabold uppercase text-[9px] print:text-[8px]">
+                        <th className="py-1 px-2 border-r border-slate-700 w-16">Code</th>
+                        <th className="py-1 px-2 border-r border-slate-700">Subject Name</th>
+                        <th className="py-1 px-1.5 text-center border-r border-slate-700 w-16">Max</th>
+                        <th className="py-1 px-1.5 text-center border-r border-slate-700 w-16">Pass</th>
+                        <th className="py-1 px-1.5 text-center border-r border-slate-700 w-20">Secured</th>
+                        <th className="py-1 px-1.5 text-center w-14">Grade</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-300 bg-white">
                       {reportCardData.result.subjectMarks.map((sub: any, i: number) => (
                         <tr key={i} className="hover:bg-slate-50">
-                          <td className="py-1 px-2.5 font-mono font-bold text-slate-700 border-r border-slate-300 text-[10px]">
+                          <td className="py-0.5 px-2 font-mono font-bold text-slate-700 border-r border-slate-300 text-[9px] print:text-[8px]">
                             {sub.subjectCode || "SUB"}
                           </td>
-                          <td className="py-1 px-2.5 font-bold text-slate-900 border-r border-slate-300">
+                          <td className="py-0.5 px-2 font-bold text-slate-900 border-r border-slate-300">
                             {sub.subjectName}
                           </td>
-                          <td className="py-1 px-2 text-center font-semibold text-slate-600 border-r border-slate-300">
+                          <td className="py-0.5 px-1.5 text-center font-semibold text-slate-600 border-r border-slate-300">
                             {sub.maxMarks}
                           </td>
-                          <td className="py-1 px-2 text-center font-semibold text-slate-600 border-r border-slate-300">
+                          <td className="py-0.5 px-1.5 text-center font-semibold text-slate-600 border-r border-slate-300">
                             {sub.passMarks}
                           </td>
-                          <td className="py-1 px-2 text-center font-black text-slate-900 border-r border-slate-300">
+                          <td className="py-0.5 px-1.5 text-center font-black text-slate-900 border-r border-slate-300">
                             {sub.marksObtained}
                           </td>
-                          <td className="py-1 px-2 text-center font-black text-blue-700">
+                          <td className="py-0.5 px-1.5 text-center font-black text-blue-700">
                             {sub.grade}
                           </td>
                         </tr>
                       ))}
                     </tbody>
+                    <tfoot>
+                      <tr className="bg-slate-100 font-black text-slate-900 border-t-2 border-slate-900 text-[10px] print:text-[9px]">
+                        <td colSpan={2} className="py-1 px-2 text-right uppercase tracking-wider border-r border-slate-300">
+                          Aggregate Total:
+                        </td>
+                        <td className="py-1 px-1.5 text-center border-r border-slate-300">
+                          {reportCardData.result.totalMaxMarks}
+                        </td>
+                        <td className="py-1 px-1.5 text-center border-r border-slate-300">-</td>
+                        <td className="py-1 px-1.5 text-center font-black text-blue-900 border-r border-slate-300">
+                          {reportCardData.result.totalMarksObtained}
+                        </td>
+                        <td className="py-1 px-1.5 text-center font-black text-blue-900">
+                          {reportCardData.result.overallGrade}
+                        </td>
+                      </tr>
+                    </tfoot>
                   </table>
                 </div>
 
                 {/* Score Summary Footnotes */}
-                <div className="grid grid-cols-4 gap-2 bg-slate-100 p-2 rounded-lg border border-slate-300 text-[11px] mb-3">
+                <div className="grid grid-cols-4 gap-1.5 print:gap-1 bg-slate-50 p-1.5 print:p-1 rounded-lg border border-slate-300 text-[10px] print:text-[8.5px] mb-1.5 print:mb-1">
                   <div>
-                    <span className="text-slate-500 font-bold block text-[10px]">TOTAL MARKS</span>
-                    <strong className="text-slate-900 text-sm">
+                    <span className="text-slate-500 font-bold block text-[8px] print:text-[7px]">TOTAL MARKS</span>
+                    <strong className="text-slate-900 text-xs print:text-[11px]">
                       {reportCardData.result.totalMarksObtained} / {reportCardData.result.totalMaxMarks}
                     </strong>
                   </div>
                   <div>
-                    <span className="text-slate-500 font-bold block text-[10px]">PERCENTAGE</span>
-                    <strong className="text-slate-900 text-sm">{reportCardData.result.percentage}%</strong>
+                    <span className="text-slate-500 font-bold block text-[8px] print:text-[7px]">PERCENTAGE</span>
+                    <strong className="text-slate-900 text-xs print:text-[11px]">{reportCardData.result.percentage}%</strong>
                   </div>
                   <div>
-                    <span className="text-slate-500 font-bold block text-[10px]">OVERALL GRADE</span>
-                    <strong className="text-blue-800 text-sm font-black">{reportCardData.result.overallGrade}</strong>
+                    <span className="text-slate-500 font-bold block text-[8px] print:text-[7px]">OVERALL GRADE</span>
+                    <strong className="text-blue-800 text-xs print:text-[11px] font-black">{reportCardData.result.overallGrade}</strong>
                   </div>
                   <div>
-                    <span className="text-slate-500 font-bold block text-[10px]">RESULT STATUS</span>
-                    <strong className={`text-sm font-black ${reportCardData.result.status === "Pass" ? "text-emerald-700" : "text-red-700"}`}>
+                    <span className="text-slate-500 font-bold block text-[8px] print:text-[7px]">RESULT STATUS</span>
+                    <strong className={`text-xs print:text-[11px] font-black ${reportCardData.result.status === "Pass" ? "text-emerald-700" : "text-red-700"}`}>
                       {reportCardData.result.status} ({reportCardData.result.division})
                     </strong>
                   </div>
                 </div>
 
-                {/* Signatures */}
-                <div className="grid grid-cols-3 pt-6 mt-4 border-t border-slate-300 text-center text-[10px]">
+                {/* Signatures & Seal */}
+                <div className="grid grid-cols-3 gap-3 print:gap-2 pt-1.5 print:pt-1 border-t border-slate-300 text-center text-[9px] print:text-[8px]">
                   <div>
-                    <div className="w-32 border-b border-slate-800 mx-auto mb-1"></div>
-                    <span className="font-bold text-slate-800 uppercase">Class Teacher Signature</span>
+                    <div className="h-5 print:h-4 border-b border-dashed border-slate-400 w-3/4 mx-auto" />
+                    <span className="font-extrabold text-slate-800 mt-0.5 block">Class Teacher</span>
                   </div>
-                  <div>
-                    <div className="w-32 border-b border-slate-800 mx-auto mb-1"></div>
-                    <span className="font-bold text-slate-800 uppercase">Exam Controller</span>
+
+                  <div className="relative">
+                    <div className="w-10 h-10 print:w-9 print:h-9 rounded-full border-2 border-double border-slate-400 mx-auto -mt-2.5 print:-mt-1.5 flex items-center justify-center text-[8px] print:text-[6.5px] text-slate-400 font-black uppercase text-center p-0.5">
+                      Official Seal
+                    </div>
+                    <span className="font-extrabold text-slate-800 mt-0.5 block">Controller of Exams</span>
                   </div>
+
                   <div>
-                    <div className="w-32 border-b border-slate-800 mx-auto mb-1"></div>
-                    <span className="font-bold text-slate-800 uppercase">Headmaster Seal & Sign</span>
+                    <div className="h-5 print:h-4 border-b border-dashed border-slate-400 w-3/4 mx-auto" />
+                    <span className="font-extrabold text-slate-800 mt-0.5 block">Headmaster / Principal</span>
                   </div>
                 </div>
               </div>

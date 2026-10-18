@@ -2801,9 +2801,9 @@ export default function Students() {
         {/* STUDENT ID CARD MODAL                                    */}
         {/* ======================================================== */}
         {isIdCardModalOpen && studentForIdCard && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in">
-            <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden flex flex-col border border-slate-200">
-              <div className="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in print:bg-transparent print:p-0">
+            <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden flex flex-col border border-slate-200 print:border-none print:shadow-none print:bg-transparent">
+              <div className="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center print:hidden">
                 <span className="font-bold text-sm text-slate-800 flex items-center gap-2">
                   <Printer className="w-4 h-4 text-indigo-600" />
                   Official Student Identity Card
@@ -2816,8 +2816,8 @@ export default function Students() {
                 </button>
               </div>
 
-              <div className="p-6 flex justify-center">
-                <div className="w-[320px] rounded-2xl overflow-hidden border-2 border-slate-800 shadow-xl bg-white flex flex-col">
+              <div className="p-6 print:p-0 flex justify-center">
+                <div id="printable-id-card" className="w-[320px] rounded-2xl overflow-hidden border-2 border-slate-800 shadow-xl print:shadow-none bg-white flex flex-col">
                   <div className="bg-gradient-to-r from-slate-900 to-indigo-950 text-white p-3 text-center border-b-2 border-amber-400">
                     <p className="text-[11px] font-black uppercase tracking-wider text-amber-300">
                       Dulichand Sonadevi High School
@@ -2901,7 +2901,7 @@ export default function Students() {
                 </div>
               </div>
 
-              <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-3">
+              <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-3 print:hidden">
                 <button
                   onClick={() => setIsIdCardModalOpen(false)}
                   className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-200 rounded-xl"

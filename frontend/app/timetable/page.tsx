@@ -1348,38 +1348,38 @@ export default function TimetablePage() {
                   </div>
                 </div>
 
-                <div id="printable-routine" className="p-4 sm:p-8 bg-white border-2 sm:border-4 border-slate-900 rounded-xl sm:rounded-2xl print:border-none print:p-0 text-slate-900 font-sans text-xs overflow-x-auto">
+                <div id="printable-routine" className="p-4 sm:p-8 bg-white border-2 sm:border-4 border-slate-900 rounded-xl sm:rounded-2xl print:border-2 print:border-slate-900 print:p-3 print:rounded-lg text-slate-900 font-sans text-xs overflow-x-auto">
                   <div className="min-w-[620px]">
                   {/* Header */}
-                  <div className="flex items-center justify-between border-b-2 border-slate-900 pb-4">
+                  <div className="flex items-center justify-between border-b-2 border-slate-900 pb-3 print:pb-1.5">
                     <img
                       src="/5tlogo.png"
                       alt="Emblem"
-                      className="h-16 w-16 object-contain rounded-xl border border-slate-300"
+                      className="h-16 w-16 print:h-12 print:w-12 object-contain rounded-xl border border-slate-300"
                     />
                     <div className="text-center flex-1 px-4">
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-blue-900 block">
+                      <span className="text-[10px] print:text-[9px] font-bold uppercase tracking-widest text-blue-900 block">
                         GOVERNMENT OF ODISHA • SCHOOL & MASS EDUCATION DEPARTMENT
                       </span>
-                      <h1 className="text-xl md:text-2xl font-black tracking-tight text-slate-950 uppercase mt-0.5">
+                      <h1 className="text-xl md:text-2xl print:text-lg font-black tracking-tight text-slate-950 uppercase mt-0.5">
                         Dulichand Sonadevi High School
                       </h1>
-                      <p className="text-xs text-slate-700 font-medium">
+                      <p className="text-xs print:text-[10px] text-slate-700 font-medium">
                         Ranamunduli, Basta, Balasore, Odisha - 756029
                       </p>
-                      <p className="text-[10px] font-bold text-emerald-800">
+                      <p className="text-[10px] print:text-[9px] font-bold text-emerald-800">
                         5T Transformation Initiative • Official School Routine
                       </p>
                     </div>
-                    <div className="w-16" />
+                    <div className="w-16 print:w-12" />
                   </div>
 
                   {/* Routine Title & Metadata */}
-                  <div className="text-center my-4">
-                    <span className="inline-block px-6 py-1 rounded-full bg-slate-900 text-white font-black text-xs uppercase tracking-wider">
+                  <div className="text-center my-3 print:my-1.5">
+                    <span className="inline-block px-6 py-1 print:px-4 print:py-0.5 rounded-full bg-slate-900 text-white font-black text-xs print:text-[11px] uppercase tracking-wider">
                       CLASS TIMETABLE & WEEKLY ACADEMIC SCHEDULE
                     </span>
-                    <div className="flex justify-between items-center text-xs font-bold text-slate-800 mt-2 px-2">
+                    <div className="flex justify-between items-center text-xs print:text-[10px] font-bold text-slate-800 mt-1.5 px-2">
                       <span>Standard: <strong>Class {timetable.class} (Section {timetable.section})</strong></span>
                       <span>Classroom: <strong>{timetable.roomNo}</strong></span>
                       <span>Class Teacher: <strong>{timetable.classTeacher}</strong></span>
@@ -1387,40 +1387,40 @@ export default function TimetablePage() {
                   </div>
 
                   {/* Schedule Table */}
-                  <div className="border border-slate-900 rounded-xl overflow-hidden mb-6">
-                    <table className="w-full text-left border-collapse text-[11px] min-w-[620px]">
+                  <div className="border border-slate-900 rounded-xl overflow-hidden mb-4 print:mb-2">
+                    <table className="w-full text-left border-collapse text-[11px] print:text-[10px] min-w-[620px]">
                       <thead>
                         <tr className="bg-slate-900 text-white font-bold uppercase text-center border-b border-slate-900">
-                          <th className="py-2.5 px-2 text-left w-24 border-r border-slate-700">Day</th>
-                          <th className="py-2 px-1 border-r border-slate-700">P1 (10:00-10:45)</th>
-                          <th className="py-2 px-1 border-r border-slate-700">P2 (10:45-11:30)</th>
-                          <th className="py-2 px-1 border-r border-slate-700">P3 (11:30-12:15)</th>
-                          <th className="py-2 px-1 border-r border-slate-700">P4 (12:15-01:00)</th>
-                          <th className="py-2 px-1 bg-slate-800 text-amber-300 w-12 border-r border-slate-700 text-[10px]">Recess</th>
-                          <th className="py-2 px-1 border-r border-slate-700">P5 (01:40-02:20)</th>
-                          <th className="py-2 px-1 border-r border-slate-700">P6 (02:20-03:00)</th>
-                          <th className="py-2 px-1">P7 (03:00-03:40)</th>
+                          <th className="py-2 px-2 print:py-1 print:px-1 text-left w-24 border-r border-slate-700">Day</th>
+                          <th className="py-2 px-1 print:py-1 border-r border-slate-700">P1 (10:00-10:45)</th>
+                          <th className="py-2 px-1 print:py-1 border-r border-slate-700">P2 (10:45-11:30)</th>
+                          <th className="py-2 px-1 print:py-1 border-r border-slate-700">P3 (11:30-12:15)</th>
+                          <th className="py-2 px-1 print:py-1 border-r border-slate-700">P4 (12:15-01:00)</th>
+                          <th className="py-2 px-1 print:py-1 bg-slate-800 text-amber-300 w-12 border-r border-slate-700 text-[10px] print:text-[9px]">Recess</th>
+                          <th className="py-2 px-1 print:py-1 border-r border-slate-700">P5 (01:40-02:20)</th>
+                          <th className="py-2 px-1 print:py-1 border-r border-slate-700">P6 (02:20-03:00)</th>
+                          <th className="py-2 px-1 print:py-1">P7 (03:00-03:40)</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-300 bg-white">
                         {timetable.weeklySchedule.map((d) => (
                           <tr key={d.day}>
-                            <td className="py-3 px-2 font-bold text-slate-900 bg-slate-50 border-r border-slate-300">
+                            <td className="py-2.5 px-2 print:py-1 print:px-1.5 font-bold text-slate-900 bg-slate-50 border-r border-slate-300">
                               {d.day}
                             </td>
                             {d.periods.slice(0, 4).map((p, i) => (
-                              <td key={i} className="py-2 px-1.5 text-center border-r border-slate-300">
-                                <strong className="block text-[10px] font-bold text-slate-900">{p.subject}</strong>
-                                <span className="text-[9px] text-slate-500 block">{p.teacherName}</span>
+                              <td key={i} className="py-2 px-1.5 print:py-1 print:px-1 text-center border-r border-slate-300">
+                                <strong className="block text-[10px] print:text-[9.5px] font-bold text-slate-900">{p.subject}</strong>
+                                <span className="text-[9px] print:text-[8px] text-slate-500 block">{p.teacherName}</span>
                               </td>
                             ))}
-                            <td className="py-2 px-1 text-center bg-slate-100 text-[9px] font-bold text-slate-400 border-r border-slate-300">
+                            <td className="py-2 px-1 print:py-1 text-center bg-slate-100 text-[9px] print:text-[8px] font-bold text-slate-400 border-r border-slate-300">
                               Break
                             </td>
                             {d.periods.slice(4, 7).map((p, i) => (
-                              <td key={i + 4} className="py-2 px-1.5 text-center border-r border-slate-300">
-                                <strong className="block text-[10px] font-bold text-slate-900">{p.subject}</strong>
-                                <span className="text-[9px] text-slate-500 block">{p.teacherName}</span>
+                              <td key={i + 4} className="py-2 px-1.5 print:py-1 print:px-1 text-center border-r border-slate-300">
+                                <strong className="block text-[10px] print:text-[9.5px] font-bold text-slate-900">{p.subject}</strong>
+                                <span className="text-[9px] print:text-[8px] text-slate-500 block">{p.teacherName}</span>
                               </td>
                             ))}
                           </tr>
@@ -1430,15 +1430,15 @@ export default function TimetablePage() {
                   </div>
 
                   {/* Signatures */}
-                  <div className="grid grid-cols-2 gap-8 pt-8 border-t border-slate-400 text-center font-bold">
+                  <div className="grid grid-cols-2 gap-8 print:gap-4 pt-6 print:pt-3 border-t border-slate-400 text-center font-bold text-xs print:text-[10px]">
                     <div>
-                      <div className="h-8 border-b border-dashed border-slate-400 w-1/2 mx-auto" />
-                      <span className="mt-2 block">Class Teacher Signature</span>
+                      <div className="h-7 print:h-5 border-b border-dashed border-slate-400 w-1/2 mx-auto" />
+                      <span className="mt-1.5 block">Class Teacher Signature</span>
                     </div>
 
                     <div>
-                      <div className="h-8 border-b border-dashed border-slate-400 w-1/2 mx-auto" />
-                      <span className="mt-2 block">Headmaster / Principal (Seal)</span>
+                      <div className="h-7 print:h-5 border-b border-dashed border-slate-400 w-1/2 mx-auto" />
+                      <span className="mt-1.5 block">Headmaster / Principal (Seal)</span>
                     </div>
                   </div>
                   </div>
@@ -1475,74 +1475,74 @@ export default function TimetablePage() {
                   </div>
                 </div>
 
-                <div id="printable-faculty-routine" className="p-4 sm:p-8 bg-white border-2 sm:border-4 border-slate-900 rounded-xl sm:rounded-2xl print:border-none print:p-0 text-slate-900 font-sans text-xs overflow-x-auto">
+                <div id="printable-faculty-routine" className="p-4 sm:p-8 bg-white border-2 sm:border-4 border-slate-900 rounded-xl sm:rounded-2xl print:border-2 print:border-slate-900 print:p-3 print:rounded-lg text-slate-900 font-sans text-xs overflow-x-auto">
                   <div className="min-w-[620px]">
                     {/* Header */}
-                    <div className="flex items-center justify-between border-b-2 border-slate-900 pb-4">
+                    <div className="flex items-center justify-between border-b-2 border-slate-900 pb-3 print:pb-1.5">
                       <img
                         src="/5tlogo.png"
                         alt="Emblem"
-                        className="h-16 w-16 object-contain rounded-xl border border-slate-300"
+                        className="h-16 w-16 print:h-12 print:w-12 object-contain rounded-xl border border-slate-300"
                       />
                       <div className="text-center flex-1 px-4">
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-blue-900 block">
+                        <span className="text-[10px] print:text-[9px] font-bold uppercase tracking-widest text-blue-900 block">
                           GOVERNMENT OF ODISHA • SCHOOL & MASS EDUCATION DEPARTMENT
                         </span>
-                        <h1 className="text-xl md:text-2xl font-black tracking-tight text-slate-950 uppercase mt-0.5">
+                        <h1 className="text-xl md:text-2xl print:text-lg font-black tracking-tight text-slate-950 uppercase mt-0.5">
                           Dulichand Sonadevi High School
                         </h1>
-                        <p className="text-xs text-slate-700 font-medium">
+                        <p className="text-xs print:text-[10px] text-slate-700 font-medium">
                           Ranamunduli, Basta, Balasore, Odisha - 756029
                         </p>
-                        <p className="text-[10px] font-bold text-emerald-800">
+                        <p className="text-[10px] print:text-[9px] font-bold text-emerald-800">
                           5T Transformation Initiative • Faculty Academic Routine
                         </p>
                       </div>
-                      <div className="w-16" />
+                      <div className="w-16 print:w-12" />
                     </div>
 
                     {/* Routine Title & Metadata */}
-                    <div className="text-center my-4">
-                      <span className="inline-block px-6 py-1 rounded-full bg-slate-900 text-white font-black text-xs uppercase tracking-wider">
+                    <div className="text-center my-3 print:my-1.5">
+                      <span className="inline-block px-6 py-1 print:px-4 print:py-0.5 rounded-full bg-slate-900 text-white font-black text-xs print:text-[11px] uppercase tracking-wider">
                         FACULTY WEEKLY TEACHING SCHEDULE & PERIOD TIMINGS
                       </span>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-bold text-slate-800 mt-3 p-3 bg-slate-50 border border-slate-300 rounded-xl text-left">
-                        <div>Faculty Name: <strong className="text-slate-950 block text-sm">{mySchedule.faculty.name}</strong></div>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs print:text-[10px] font-bold text-slate-800 mt-2 print:mt-1 p-2.5 print:p-1.5 bg-slate-50 border border-slate-300 rounded-xl text-left">
+                        <div>Faculty Name: <strong className="text-slate-950 block text-xs print:text-[11px]">{mySchedule.faculty.name}</strong></div>
                         <div>Designation: <strong className="text-slate-950 block">{mySchedule.faculty.designation || "Faculty"}</strong></div>
                         <div>Primary Subject: <strong className="text-slate-950 block">{mySchedule.faculty.subject || "All Assigned"}</strong></div>
-                        <div>Total Weekly Load: <strong className="text-slate-950 block">{mySchedule.totalWeeklyPeriods} Periods / Week</strong></div>
+                        <div>Weekly Load: <strong className="text-slate-950 block">{mySchedule.totalWeeklyPeriods} Periods / Week</strong></div>
                       </div>
                     </div>
 
                     {/* Schedule Table */}
-                    <div className="border border-slate-900 rounded-xl overflow-hidden mb-6">
-                      <table className="w-full text-left border-collapse text-[11px] min-w-[620px]">
+                    <div className="border border-slate-900 rounded-xl overflow-hidden mb-4 print:mb-2">
+                      <table className="w-full text-left border-collapse text-[11px] print:text-[10px] min-w-[620px]">
                         <thead>
                           <tr className="bg-slate-900 text-white font-bold uppercase text-center border-b border-slate-900">
-                            <th className="py-2.5 px-3 text-left w-28 border-r border-slate-700">Day</th>
-                            <th className="py-2.5 px-3 text-left border-r border-slate-700">Allocated Teaching Periods & Timing</th>
-                            <th className="py-2.5 px-3 text-center w-28">Total Classes</th>
+                            <th className="py-2 px-3 print:py-1 print:px-2 text-left w-28 border-r border-slate-700">Day</th>
+                            <th className="py-2 px-3 print:py-1 print:px-2 text-left border-r border-slate-700">Allocated Teaching Periods & Timing</th>
+                            <th className="py-2 px-3 print:py-1 print:px-2 text-center w-28">Total Classes</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-300 bg-white">
                           {mySchedule.weeklySchedule.map((d) => (
                             <tr key={d.day}>
-                              <td className="py-3 px-3 font-bold text-slate-900 bg-slate-50 border-r border-slate-300 align-top">
+                              <td className="py-2.5 px-3 print:py-1 print:px-2 font-bold text-slate-900 bg-slate-50 border-r border-slate-300 align-top">
                                 {d.day}
                               </td>
-                              <td className="py-2.5 px-3 border-r border-slate-300">
+                              <td className="py-2 px-3 print:py-1 print:px-2 border-r border-slate-300">
                                 {d.periods.length === 0 ? (
-                                  <span className="text-slate-400 italic">No classes scheduled</span>
+                                  <span className="text-slate-400 italic text-[10px]">No classes scheduled</span>
                                 ) : (
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 print:gap-1">
                                     {d.periods.map((p, pIdx) => (
-                                      <div key={pIdx} className="p-2 rounded-lg border border-slate-200 bg-slate-50/50">
-                                        <div className="flex items-center justify-between font-bold text-[10px]">
+                                      <div key={pIdx} className="p-1.5 print:p-1 rounded-lg border border-slate-200 bg-slate-50/50">
+                                        <div className="flex items-center justify-between font-bold text-[10px] print:text-[9px]">
                                           <span className="bg-slate-900 text-white px-1.5 py-0.5 rounded">P{p.periodNo}</span>
                                           <span className="text-slate-700 font-mono font-bold">{p.timing}</span>
                                         </div>
-                                        <div className="font-extrabold text-slate-900 mt-1">{p.subject}</div>
-                                        <div className="text-[10px] text-slate-600 flex justify-between font-semibold mt-0.5">
+                                        <div className="font-extrabold text-slate-900 mt-0.5">{p.subject}</div>
+                                        <div className="text-[10px] print:text-[8.5px] text-slate-600 flex justify-between font-semibold mt-0.5">
                                           <span>Class {p.class}-{p.section}</span>
                                           <span>{p.roomNo}</span>
                                         </div>
@@ -1551,7 +1551,7 @@ export default function TimetablePage() {
                                   </div>
                                 )}
                               </td>
-                              <td className="py-3 px-3 text-center font-black text-slate-900 align-top">
+                              <td className="py-2.5 px-3 print:py-1 print:px-2 text-center font-black text-slate-900 align-top">
                                 {d.periods.length}
                               </td>
                             </tr>
@@ -1561,15 +1561,15 @@ export default function TimetablePage() {
                     </div>
 
                     {/* Signatures */}
-                    <div className="grid grid-cols-2 gap-8 pt-8 border-t border-slate-400 text-center font-bold">
+                    <div className="grid grid-cols-2 gap-8 print:gap-4 pt-6 print:pt-3 border-t border-slate-400 text-center font-bold text-xs print:text-[10px]">
                       <div>
-                        <div className="h-8 border-b border-dashed border-slate-400 w-1/2 mx-auto" />
-                        <span className="mt-2 block">Faculty Signature</span>
+                        <div className="h-7 print:h-5 border-b border-dashed border-slate-400 w-1/2 mx-auto" />
+                        <span className="mt-1.5 block">Faculty Signature</span>
                       </div>
 
                       <div>
-                        <div className="h-8 border-b border-dashed border-slate-400 w-1/2 mx-auto" />
-                        <span className="mt-2 block">Headmaster / Principal (Seal)</span>
+                        <div className="h-7 print:h-5 border-b border-dashed border-slate-400 w-1/2 mx-auto" />
+                        <span className="mt-1.5 block">Headmaster / Principal (Seal)</span>
                       </div>
                     </div>
                   </div>

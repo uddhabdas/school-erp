@@ -631,6 +631,7 @@ export default function FeesPage() {
             max-width: 100% !important;
             height: auto !important;
             max-height: 282mm !important;
+            box-sizing: border-box !important;
             margin: 0 !important;
             padding: 0 !important;
             background: white !important;
@@ -641,6 +642,7 @@ export default function FeesPage() {
             page-break-inside: avoid !important;
             break-after: avoid !important;
             break-inside: avoid !important;
+            overflow: hidden !important;
             z-index: 9999999 !important;
           }
           .print-hidden, .print\\:hidden, button {

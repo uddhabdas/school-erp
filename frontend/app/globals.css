@@ -67,13 +67,19 @@
   html, body {
     margin: 0 !important;
     padding: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 100% !important;
+    max-height: none !important;
+    overflow: visible !important;
     background: #ffffff !important;
     color: #000000 !important;
-    overflow: visible !important;
-    height: auto !important;
-    max-height: none !important;
+  }
+
+  *, *::before, *::after {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+    color-adjust: exact !important;
   }
 
   /* Hide global background UI elements during printing */
@@ -82,15 +88,21 @@
   footer,
   aside,
   button,
-  .portal-dashboard-content,
-  .exams-dashboard-content,
+  input,
+  select,
+  textarea,
   .print-hidden,
   .print\:hidden {
     display: none !important;
   }
 
-  /* Reset modal backdrop so it doesn't tint, clip, or position-fix during print */
-  #report-card-modal-backdrop {
+  /* Reset all modal backdrops and dialog containers so they don't clip or create page spillover */
+  .fixed.inset-0,
+  #report-card-modal-backdrop,
+  #receipt-modal-backdrop,
+  #fee-receipt-modal-backdrop,
+  #report-card-modal-dialog,
+  #receipt-modal-dialog {
     position: static !important;
     inset: auto !important;
     background: transparent !important;
@@ -103,66 +115,14 @@
     max-height: none !important;
     width: 100% !important;
     display: block !important;
-    z-index: auto !important;
-  }
-
-  /* Reset modal dialog container */
-  #report-card-modal-dialog {
-    position: static !important;
-    background: transparent !important;
     box-shadow: none !important;
     border: none !important;
     border-radius: 0 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    overflow: visible !important;
-    max-height: none !important;
-    max-width: 100% !important;
-    width: 100% !important;
-    display: block !important;
+    transform: none !important;
+    z-index: auto !important;
   }
 
-  /* 1-Page Marksheet container */
-  #printable-report-card {
-    display: block !important;
-    position: static !important;
-    margin: 0 auto !important;
-    padding: 6px 10px !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    max-height: 285mm !important;
-    box-sizing: border-box !important;
-    background: #ffffff !important;
-    color: #0f172a !important;
-    border: 2px solid #0f172a !important;
-    border-radius: 6px !important;
-    page-break-after: avoid !important;
-    page-break-inside: avoid !important;
-    break-after: avoid !important;
-    break-inside: avoid !important;
-    page-break-before: avoid !important;
-    break-before: avoid !important;
-  }
-
-  /* 1-Page Money Receipt container */
-  #printable-receipt-root {
-    display: block !important;
-    position: static !important;
-    margin: 0 auto !important;
-    padding: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    max-height: 282mm !important;
-    box-sizing: border-box !important;
-    background: #ffffff !important;
-    color: #0f172a !important;
-    page-break-after: avoid !important;
-    page-break-inside: avoid !important;
-    break-after: avoid !important;
-    break-inside: avoid !important;
-  }
-
-  /* Ensure visibility of target components */
+  /* Guarantee all target printable components are visible while other elements stay hidden */
   body * {
     visibility: hidden;
   }
@@ -170,7 +130,85 @@
   #printable-report-card,
   #printable-report-card *,
   #printable-receipt-root,
-  #printable-receipt-root * {
-    visibility: visible;
+  #printable-receipt-root *,
+  #printable-fee-receipt,
+  #printable-fee-receipt *,
+  #printable-certificate,
+  #printable-certificate *,
+  #printable-routine,
+  #printable-routine *,
+  #printable-faculty-routine,
+  #printable-faculty-routine *,
+  #printable-slip,
+  #printable-slip *,
+  #printable-id-card,
+  #printable-id-card * {
+    visibility: visible !important;
+  }
+
+  /* Universal 1-Page Document Container Constraints */
+  #printable-report-card,
+  #printable-receipt-root,
+  #printable-fee-receipt,
+  #printable-certificate,
+  #printable-routine,
+  #printable-faculty-routine,
+  #printable-slip {
+    display: block !important;
+    visibility: visible !important;
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 275mm !important;
+    margin: 0 auto !important;
+    padding: 6px 10px !important;
+    box-sizing: border-box !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    overflow: hidden !important;
+    page-break-after: avoid !important;
+    page-break-inside: avoid !important;
+    page-break-before: avoid !important;
+    break-after: avoid !important;
+    break-inside: avoid !important;
+    break-before: avoid !important;
+    z-index: 999999 !important;
+  }
+
+  /* Specific border and padding styling for Marksheet */
+  #printable-report-card {
+    border: 2px solid #0f172a !important;
+    border-radius: 6px !important;
+    padding: 6px 10px !important;
+  }
+
+  /* Specific border and padding styling for Fee Receipts */
+  #printable-receipt-root,
+  #printable-fee-receipt {
+    border: none !important;
+    padding: 0 !important;
+    max-height: 282mm !important;
+  }
+
+  /* Specific styling for Student ID Card (Centered on Page) */
+  #printable-id-card {
+    display: flex !important;
+    position: absolute !important;
+    left: 50% !important;
+    top: 35mm !important;
+    transform: translateX(-50%) !important;
+    width: 320px !important;
+    max-width: 320px !important;
+    max-height: 280mm !important;
+    box-sizing: border-box !important;
+    background: #ffffff !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+    z-index: 999999 !important;
   }
 }
+
